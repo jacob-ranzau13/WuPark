@@ -7,14 +7,14 @@ print("socket created")
 s.bind(('', port))
 print("socket bound to port 12345")
 
-s.listen(5)     
+s.listen(5) # will hold five connections in queue, other connections will be refused
 print ("socket is listening")
 
 while True:
     c, addr = s.accept()
     print("got connection from", addr)
 
-    c.send("Thank you for connecting".encode())
+    c.send("Thank you for connecting".encode()) # default encoding utf-8
     print("message sent")
     c.close()
     break
