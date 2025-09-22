@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 
 # Placeholder data with image paths
 parking_data = {
-    "Lot A": {"Total": 50, "Available": 12, "Handicapped": 2, "Image": "LotImages/student-parking-WSU.jpg"},
+    "Lot A": {"Total": 50, "Available": 12, "Handicapped": 2, "Image": "LotImages/AllLots.jpg"},
     "Lot B": {"Total": 30, "Available": 5, "Handicapped": 1, "Image": "LotImages/student-parking-WSU.jpg"},
     "Lot C": {"Total": 20, "Available": 0, "Handicapped": 0, "Image": "LotImages/student-parking-WSU.jpg"},
 }
