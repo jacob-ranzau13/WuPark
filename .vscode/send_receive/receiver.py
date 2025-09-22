@@ -9,7 +9,7 @@ port = 12345
 s.connect(('127.0.0.1', port))
 
 data = s.recv(MAX_BYTES)
-a, b, c, d = struct.unpack('BBBB', data) # unpacking bytes into four separate variables
-print(b)
+for byte in data:
+    print(byte)
 
 s.close()
