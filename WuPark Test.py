@@ -80,6 +80,28 @@ def show_lot_image(lot_name):
     except Exception as e:
         img_label.config(text=f"Error loading image:\n{e}")
 
+def update_lot_from_bytes(data: bytes):
+
+    n_following = data[0]        
+    lot_number = data[1]           
+    bit_bytes = data[2:2 + n_following]
+
+    bits = "".join(f"{b:08b}" for b in bit_bytes)
+
+    lot_map = {
+        5: "LotJBC",
+        6: "Lot6",
+        9: "Lot9E"
+    }
+
+    lot_name = lot_map.get(lot_number)
+   
+    lot_camera_bits[lot_name] = bits
+    free_count = bits.count("0")
+    parking_data[lot_name]["Available"] = free_count
+
+    show_lot_image(lot_name)  
+
 
 root = tk.Tk()
 root.title("WuPark Prototype")
