@@ -5,65 +5,68 @@ from PIL import Image, ImageTk, ImageDraw
 # Placeholder data with image paths
 parking_data = {
     "Lot9E": {
-        "Total": 50,
-        "Available": 12,
-        "Handicapped": 2,
+        "Total": 50, "Available": 12,
         "Image": "LotImages/Lot9E.png",
-        "Spots": [
-            {"coords": [50, 50, 100, 100], "available": True},
-            {"coords": [120, 50, 170, 100], "available": False}
-        ]
     },
     "Lot6": {
-        "Total": 30,
-        "Available": 5,
-        "Handicapped": 1,
+        "Total": 40, "Available": 5,
         "Image": "LotImages/Lot6.png",
-        "Spots": [
-            {"coords": [30, 30, 80, 80], "available": False},
-            {"coords": [100, 30, 150, 80], "available": True}
-        ]
     },
     "LotJBC": {
-        "Total": 20,
-        "Available": 0,
-        "Handicapped": 0,
+        "Total": 36, "Available": 0,
         "Image": "LotImages/LotJBC.png",
-        "Spots": [
-            {"coords": [20, 20, 70, 70], "available": False},
-            {"coords": [90, 20, 140, 70], "available": False}
-        ]
-    },
+    }
 }
 
+lot_coords = { # hardcoded stall coords and labels; seperated into columns
+    "LotJBC": [
+        [(241, 101, 1), (241, 141, 2), (241, 181, 3), (241, 221, 4), (241, 261, 5), (241, 301, 6), (241, 341, 7), (241, 381, 8), (241, 421, 9)],
+        [(470, 101, 10), (470, 141, 11), (470, 181, 12), (470, 221, 13), (470, 263, 14), (470, 303, 15), (470, 344, 16), (470, 384, 17), (470, 424, 18)],
+        [(562, 101, 19), (562, 141, 20), (562, 181, 21), (562, 221, 22), (562, 263, 23), (562, 303, 24), (562, 344, 25), (562, 384, 26), (562, 424, 27)],
+        [(780, 89, 28), (780, 131, 29), (780, 172, 30), (780, 213, 31), (780, 253, 32), (780, 295, 33), (780, 337, 34), (780, 379, 35), (780, 421, 36)]
+    ]
+}
 
+lot_camera_bits = { 
+    "LotJBC": "101100110101011011110000000011111010"  # hardcoded chunk of json sent from pi
+}
 def show_lot_image(lot_name):
-    lot_info = parking_data[lot_name]
+    image_path = parking_data[lot_name]["Image"]
     try:
-        img = Image.open(lot_info["Image"])
-        draw = ImageDraw.Draw(img)
+        img = Image.open(image_path)
+        orig_w, orig_h = img.size
 
-        # Draw red/green boxes for spots
-        for spot in lot_info["Spots"]:
-            color = "green" if spot["available"] else "red"
-            draw.rectangle(spot["coords"], outline=color, width=3)
+        disp_w, disp_h = 500, 700
+        scale = min(disp_w / orig_w, disp_h / orig_h)
+        new_w, new_h = int(orig_w * scale), int(orig_h * scale)
+        img_resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        draw = ImageDraw.Draw(img_resized)
+        bits = lot_camera_bits.get(lot_name, "")
 
-        # Auto-resize to fit the image frame
-        max_width = 400
-        max_height = 300
-        orig_width, orig_height = img.size
-        scale = min(max_width / orig_width, max_height / orig_height)
-        new_size = (int(orig_width * scale), int(orig_height * scale))
-        img = img.resize(new_size, Image.Resampling.LANCZOS)
+        if lot_name in lot_coords:
+            coords_ordered = [spot for col in reversed(lot_coords[lot_name]) for spot in col]
 
-        tk_img = ImageTk.PhotoImage(img)
+            for (x, y, stall_num) in coords_ordered:
+                xs = int(x * scale)
+                ys = int(y * scale)
+                r = 6 # radius of circle
+                color = "green"
 
-        # Update the label
-        img_label.configure(image=tk_img)
-        img_label.image = tk_img
+                if stall_num <= len(bits):
+                    color = "red" if bits[stall_num - 1] == "1" else "green"
+                else:
+                    color = "gray"  # extra stalls or no data
+
+                draw.ellipse((xs - r, ys - r, xs + r, ys + r), fill=color, outline="black")
+
+
+        tk_img = ImageTk.PhotoImage(img_resized)
+
+        img_label.config(image=tk_img)
+        img_label.image = tk_img 
 
     except Exception as e:
-        print(f"Error loading image: {e}")
+        img_label.config(text=f"Error loading image:\n{e}")
 
 
 root = tk.Tk()
@@ -72,7 +75,7 @@ root.title("WuPark Prototype")
 frame = tk.Frame(root)
 frame.pack(padx=10, pady=10)
 
-columns = ("Lot Name", "Total Spots", "Available", "Handicapped")
+columns = ("Lot Name", "Total Spots", "Available")  # add a handicapped feature later
 tree = ttk.Treeview(frame, columns=columns, show="headings", height=10)
 
 for col in columns:
@@ -80,7 +83,7 @@ for col in columns:
 
 for lot, stats in parking_data.items():
     tree.insert("", "end", iid=lot,
-                values=(lot, stats["Total"], stats["Available"], stats["Handicapped"]))
+                values=(lot, stats["Total"], stats["Available"]))
 
 tree.grid(row=0, column=0, padx=10, sticky="n")
 
@@ -94,7 +97,7 @@ def on_item_click(event):
 
 tree.bind("<ButtonRelease-1>", on_item_click)
 
-# Show first lot by default
+# This shows the first lot image automatically when you open the window
 first_lot = list(parking_data.keys())[0]
 show_lot_image(first_lot)
 
