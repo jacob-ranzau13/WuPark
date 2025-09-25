@@ -30,6 +30,26 @@ lot_coords = { # hardcoded stall coords and labels; seperated into columns
 lot_camera_bits = { 
     "LotJBC": "101100110101011011110000000011111010"  # hardcoded chunk of json sent from pi
 }
+
+def draw_stalls(draw, lot_name, scale):
+    bits = lot_camera_bits.get(lot_name, "")
+    if lot_name not in lot_coords:
+        return
+
+    coords_ordered = [spot for col in reversed(lot_coords[lot_name]) for spot in col]
+
+    for (x, y, stall_num) in coords_ordered:
+        xs = int(x * scale)
+        ys = int(y * scale)
+        r = 6
+
+        if stall_num <= len(bits):
+            color = "red" if bits[stall_num - 1] == "1" else "green"
+        else:
+            color = "gray"
+
+        draw.ellipse((xs - r, ys - r, xs + r, ys + r), fill=color, outline="black")
+
 def show_lot_image(lot_name):
     image_path = parking_data[lot_name]["Image"]
     try:
@@ -41,23 +61,15 @@ def show_lot_image(lot_name):
         new_w, new_h = int(orig_w * scale), int(orig_h * scale)
         img_resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
         draw = ImageDraw.Draw(img_resized)
+
         bits = lot_camera_bits.get(lot_name, "")
 
-        if lot_name in lot_coords:
-            coords_ordered = [spot for col in reversed(lot_coords[lot_name]) for spot in col]
+        if bits:
+            available_count = sum(1 for b in bits if b == "0")
+            tree.set(lot_name, "Available", available_count)
 
-            for (x, y, stall_num) in coords_ordered:
-                xs = int(x * scale)
-                ys = int(y * scale)
-                r = 6 # radius of circle
-                color = "green"
-
-                if stall_num <= len(bits):
-                    color = "red" if bits[stall_num - 1] == "1" else "green"
-                else:
-                    color = "gray"  # extra stalls or no data
-
-                draw.ellipse((xs - r, ys - r, xs + r, ys + r), fill=color, outline="black")
+        # calls helper
+        draw_stalls(draw, lot_name, scale)
 
 
         tk_img = ImageTk.PhotoImage(img_resized)
