@@ -32,12 +32,6 @@ lot_coords = { # hardcoded stall coords and labels; seperated into columns
     ]
 }
 
-demo_packets = [
-    [0b00000110, 1, 0b10110011, 0b01010110, 0b11110000, 0b00001111, 0b10110000],
-    [0b00000110, 1, 0b10111111, 0b01111110, 0b11111101, 0b01101111, 0b10101010],
-    [0b00000110, 1, 0b10110011, 0b01010110, 0b11111111, 0b10000111, 0b01010101],
-]
-
 lot_camera_bits = {lot: "0" * stats["Total"] for lot, stats in parking_data.items()}
 
 def bytes_to_bitstring(b: bytes) -> str:
@@ -52,6 +46,7 @@ def fetch_latest_status():
         rows = cur.fetchall()
         conn.close()
 
+        
         id_to_lot = {str(v["ID"]): k for k, v in parking_data.items()}
 
         for db_id, status_bytes in rows:
