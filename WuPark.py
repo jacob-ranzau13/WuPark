@@ -40,6 +40,10 @@ demo_packets = [
 
 lot_camera_bits = {lot: "0" * stats["Total"] for lot, stats in parking_data.items()}
 
+def bytes_to_bitstring(b: bytes) -> str:
+    return "".join(f"{byte:08b}" for byte in b)
+
+
 def fetch_latest_status():
     try:
         conn = sqlite3.connect(DB_FILE)
@@ -48,15 +52,17 @@ def fetch_latest_status():
         rows = cur.fetchall()
         conn.close()
 
-        id_to_lot = {v["ID"]: k for k, v in parking_data.items()}
+        id_to_lot = {str(v["ID"]): k for k, v in parking_data.items()}
 
-        for db_id, status in rows:
+        for db_id, status_bytes in rows:
             lot_name = id_to_lot.get(db_id)
-            if lot_name:
-                lot_camera_bits[lot_name] = status
-                parking_data[lot_name]["Available"] = status.count("0")
+            if lot_name and isinstance(status_bytes, (bytes, bytearray)):
+                bit_str = bytes_to_bitstring(status_bytes)
+                lot_camera_bits[lot_name] = bit_str[:parking_data[lot_name]["Total"]]
+                parking_data[lot_name]["Available"] = bit_str.count("0")
 
         return True
+    
     except Exception as e:
         print(f"DB fetch error: {e}")
         return False
@@ -148,14 +154,15 @@ def main():
     first_lot = list(parking_data.keys())[0]
     show_lot_image(first_lot)
 
+    fetch_latest_status()
 
-    def simulate_updates():
-        packet = fetch_latest_status
-        selected = tree.focus() or first_lot
-        show_lot_image(selected)
-        root.after(3000, simulate_updates)
+    #def simulate_updates():
+    #    fetch_latest_status()
+    #    selected = tree.focus() or first_lot
+    #    show_lot_image(selected)
+    #    root.after(3000, simulate_updates)
     
-    root.after(1000, simulate_updates)
+    #root.after(1000, simulate_updates)
 
     root.mainloop()
 
