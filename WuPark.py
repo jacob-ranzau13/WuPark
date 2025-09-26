@@ -9,14 +9,17 @@ parking_data = {
     "Lot9E": {
         "Total": 50, "Available": 12,
         "Image": "LotImages/Lot9E.png",
+        "ID" : 9
     },
     "Lot6": {
         "Total": 40, "Available": 5,
         "Image": "LotImages/Lot6.png",
+        "ID" : 6
     },
     "LotJBC": {
         "Total": 36, "Available": 0,
         "Image": "LotImages/LotJBC.png",
+        "ID" : 1
     }
 }
 
@@ -45,12 +48,13 @@ def fetch_latest_status():
         rows = cur.fetchall()
         conn.close()
 
-        for name, status in rows:
-            if name in parking_data:
-                lot_camera_bits[name] = status
-                parking_data[name]["Available"] = status.count("0")
-            if tree:
-                tree.set(name, "Available", parking_data[name]["Available"])
+        id_to_lot = {v["ID"]: k for k, v in parking_data.items()}
+
+        for db_id, status in rows:
+            lot_name = id_to_lot.get(db_id)
+            if lot_name:
+                lot_camera_bits[lot_name] = status
+                parking_data[lot_name]["Available"] = status.count("0")
 
         return True
     except Exception as e:
