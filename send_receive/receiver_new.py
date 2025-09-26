@@ -16,17 +16,20 @@ for i in range(3):
         c, addr = s.accept()
 
         data = c.recv(1024)
-        totalbytes = len(data)
-        print("Received {} bytes".format(totalbytes))
         bytenum = 0
         lotnumber = 0
         j = 0
 
         for byte in data:
-            if(bytenum == 1):
+            if(bytenum == 0):
+                print("Expecting {} bytes".format(byte))
+                bytenum += 1
+            elif(bytenum == 1):
                 print("Lot number {}".format(byte))
-                lotnumber = byte
-                cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (b'', str(lotnumber))) # reset lot status
+                lotnumber = int(byte)
+                cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (b'', str(lotnumber)))
+                header = len(data).to_bytes(1,'big') + lotnumber.to_bytes(1,'big')
+                cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (header, str(lotnumber)))
                 conn.commit()
                 bytenum += 1
             else:
@@ -37,13 +40,29 @@ for i in range(3):
                 cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (combined_bytes, str(lotnumber)))
                 conn.commit()
 
-        cursor.execute('SELECT lotStatus FROM parkingLots WHERE name = ?', (str(lotnumber),))
-        row = cursor.fetchone()
-        print(row)
+                cursor.execute('SELECT lotStatus FROM parkingLots WHERE name = ?', (str(lotnumber),))
+                row = cursor.fetchone()
+                print(row)
+
+                '''
+                for i in range(8):
+                    bit = (byte >> (7 - i)) & 1  # Get bit i (from most to least significant)
+                    if(bit):
+                        print("Space {} is taken".format(1 + i + j * 8))
+                    else:
+                        print("Space {} is free".format(1 + i + j * 8))
+                j += 1
+                '''
 
         c.close()
         break
 
 conn.commit()
+
+cursor.execute('SELECT lotStatus FROM parkingLots WHERE name = ?', (str(lotnumber),))
+row = cursor.fetchone()
+print("Final status of lot {}: ".format(lotnumber))
+print(row)
+
 conn.close()
 s.close()
