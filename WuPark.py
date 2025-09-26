@@ -111,12 +111,18 @@ def update_lot_from_bytes(packet):
             return
 
         lot_camera_bits[lot_name] = bits[:parking_data[lot_name]["Total"]]
-        show_lot_image(lot_name)
 
-    # Schedule on the main Tkinter thread
+        free_count = lot_camera_bits[lot_name].count("0")
+        parking_data[lot_name]["Available"] = free_count
+        if tree:
+            tree.set(lot_name, "Available", free_count)
+
+        selected = tree.focus()
+        if selected == lot_name:
+            show_lot_image(lot_name)
+
     if root:
         root.after(0, update)
-
 # main with tkinkter popup and demo simulations
 def main():
     global root, tree, img_label
