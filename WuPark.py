@@ -154,15 +154,13 @@ def main():
     first_lot = list(parking_data.keys())[0]
     show_lot_image(first_lot)
 
-    fetch_latest_status()
-
-    #def simulate_updates():
-    #    fetch_latest_status()
-    #    selected = tree.focus() or first_lot
-    #    show_lot_image(selected)
-    #    root.after(3000, simulate_updates)
+    def simulate_updates():
+        fetch_latest_status()
+        selected = tree.focus() or first_lot
+        show_lot_image(selected)
+        root.after(3000, simulate_updates)
     
-    #root.after(1000, simulate_updates)
+    root.after(1000, simulate_updates)
 
     root.mainloop()
 
