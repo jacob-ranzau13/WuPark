@@ -11,13 +11,14 @@ cursor = conn.cursor()
 socket = sock.socket()
 port = 12345
 
-socket.bind(('', port))
+socket.bind(('127.0.0.1', port))
 socket.listen(5)
 
 for i in range(5):
     while True:
         print("waiting for connection " + str(i))
         c, addr = socket.accept()
+        print("Got connection from", addr)
 
         data = c.recv(1024)
         bytenum = 0
