@@ -14,7 +14,7 @@ port = 12345
 socket.bind(('', port))
 socket.listen(5)
 
-for i in range(3):
+for i in range(5):
     while True:
         print("waiting for connection " + str(i))
         c, addr = socket.accept()
@@ -29,8 +29,8 @@ for i in range(3):
             elif(bytenum == 1): # second byte is lot number
                 lotnumber = int(byte)
                 cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (b'', str(lotnumber))) # reset lotStatus to empty bytes
-                header = len(data).to_bytes(1,'big') + lotnumber.to_bytes(1,'big') # build a header out of the first two bytes
-                cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (header, str(lotnumber))) # insert header into db
+                # header = len(data).to_bytes(1,'big') + lotnumber.to_bytes(1,'big') # build a header out of the first two bytes
+                # cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (header, str(lotnumber))) # insert header into db
                 conn.commit()
                 bytenum += 1
             else: # all further bytes refer to whether a space is taken (1) or free (0)
