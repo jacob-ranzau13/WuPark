@@ -16,18 +16,17 @@ for i in range(3):
         c, addr = s.accept()
 
         data = c.recv(1024)
+        totalbytes = len(data)
+        print("Received {} bytes".format(totalbytes))
         bytenum = 0
         lotnumber = 0
         j = 0
 
         for byte in data:
-            if(bytenum == 0):
-                print("Expecting {} bytes".format(byte))
-                bytenum += 1
-            elif(bytenum == 1):
+            if(bytenum == 1):
                 print("Lot number {}".format(byte))
-                lotnumber = int(byte)
-                cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (b'', str(lotnumber)))
+                lotnumber = byte
+                cursor.execute('UPDATE parkingLots SET lotStatus = ? WHERE name = ?', (b'', str(lotnumber))) # reset lot status
                 conn.commit()
                 bytenum += 1
             else:
