@@ -1,11 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
+import sqlite3
 
-# globals for live updates
-root = None
-tree = None
-img_label = None
+DB_FILE = "lots.db"
 
 parking_data = {
     "Lot9E": {
@@ -31,17 +29,33 @@ lot_coords = { # hardcoded stall coords and labels; seperated into columns
     ]
 }
 
-camera_packet = [0b00000110, 0b00000001, 0b10110011, 0b01010110, 0b11110000, 0b00001111, 0b10110000]
-
 demo_packets = [
     [0b00000110, 1, 0b10110011, 0b01010110, 0b11110000, 0b00001111, 0b10110000],
     [0b00000110, 1, 0b10111111, 0b01111110, 0b11111101, 0b01101111, 0b10101010],
     [0b00000110, 1, 0b10110011, 0b01010110, 0b11111111, 0b10000111, 0b01010101],
 ]
 
-lot_camera_bits = { 
-    "LotJBC": "101100110101011011110000000011111010"  # hardcoded chunk of json sent from pi
-}
+lot_camera_bits = {lot: "0" * stats["Total"] for lot, stats in parking_data.items()}
+
+def fetch_latest_status():
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cur = conn.cursor()
+        cur.execute("SELECT name, lotStatus FROM parkingLots")
+        rows = cur.fetchall()
+        conn.close()
+
+        for name, status in rows:
+            if name in parking_data:
+                lot_camera_bits[name] = status
+                parking_data[name]["Available"] = status.count("0")
+            if tree:
+                tree.set(name, "Available", parking_data[name]["Available"])
+
+        return True
+    except Exception as e:
+        print(f"DB fetch error: {e}")
+        return False
 
 def draw_stalls(draw, lot_name, scale):
     bits = lot_camera_bits.get(lot_name, "")
@@ -94,35 +108,6 @@ def show_lot_image(lot_name):
         if img_label:
             img_label.config(text=f"Error loading image:\n{e}")
 
-# update stall status (chart and image)
-def update_lot_from_bytes(packet):
-    def update():
-        if not packet or len(packet) < 2:
-            return
-        n_following = packet[0]
-        lot_number = packet[1]
-        bit_bytes = packet[2:2 + n_following]
-
-        bits = "".join(f"{b:08b}" for b in bit_bytes)
-
-        lot_map = {1: "LotJBC", 6: "Lot6", 9: "Lot9E"}
-        lot_name = lot_map.get(lot_number)
-        if not lot_name:
-            return
-
-        lot_camera_bits[lot_name] = bits[:parking_data[lot_name]["Total"]]
-
-        free_count = lot_camera_bits[lot_name].count("0")
-        parking_data[lot_name]["Available"] = free_count
-        if tree:
-            tree.set(lot_name, "Available", free_count)
-
-        selected = tree.focus()
-        if selected == lot_name:
-            show_lot_image(lot_name)
-
-    if root:
-        root.after(0, update)
 # main with tkinkter popup and demo simulations
 def main():
     global root, tree, img_label
@@ -160,10 +145,11 @@ def main():
     show_lot_image(first_lot)
 
 
-    def simulate_updates(index=0):
-        packet = demo_packets[index % len(demo_packets)]
-        update_lot_from_bytes(packet)
-        root.after(3000, simulate_updates, index + 1)
+    def simulate_updates():
+        packet = fetch_latest_status
+        selected = tree.focus() or first_lot
+        show_lot_image(selected)
+        root.after(3000, simulate_updates)
     
     root.after(1000, simulate_updates)
 
