@@ -3,13 +3,9 @@ import sqlite3 as sql
 conn = sql.connect('lots.db')
 c = conn.cursor()
 
-c.execute('''
-          CREATE TABLE IF NOT EXISTS parkingLots
-          (name TEXT PRIMARY KEY NOT NULL, 
-          lotStatus BLOB NOT NULL)
-          ''')
-
-c.execute('INSERT INTO parkingLots (name, lotStatus) VALUES (?, ?)', ('1', b''))
+c.execute('SELECT lotStatus FROM parkingLots WHERE name = ?', ('1',))
+row = c.fetchone()
+print(row)
 
 conn.commit()
 conn.close()
