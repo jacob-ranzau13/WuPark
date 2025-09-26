@@ -1,6 +1,6 @@
 import socket as sock
 
-for _ in range(5):
+for _ in range(3):
     s = sock.socket()
     port = 12345
     s.connect(('127.0.0.1', port))
