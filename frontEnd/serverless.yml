@@ -1,0 +1,128 @@
+service: wupark-frontend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+
+plugins:
+  - serverless-finch
+
+custom:
+  client:
+    bucketName: wupark-frontend-${self:provider.stage}
+    distributionFolder: build
+    indexDocument: index.html
+    errorDocument: error.html
+    uploadConcurrency: 10
+    manageResources: true
+    
+    cloudFrontConfiguration:
+      Comment: WuPark Frontend Distribution
+      DefaultCacheBehavior:
+        ViewerProtocolPolicy: redirect-to-https
+        Compress: true
+        DefaultTTL: 300
+        MaxTTL: 86400
+        MinTTL: 0
+        TargetOriginId: S3-${self:custom.client.bucketName}
+        ForwardedValues:
+          QueryString: false
+          Cookies:
+            Forward: none
+      CustomErrorResponses:
+        - ErrorCode: 404
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+          ErrorCachingMinTTL: 300
+        - ErrorCode: 403
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+          ErrorCachingMinTTL: 300
+      Enabled: true
+      Origins:
+        - DomainName: ${self:custom.client.bucketName}.s3.amazonaws.com
+          Id: S3-${self:custom.client.bucketName}
+          S3OriginConfig:
+            OriginAccessIdentity: ''
+      PriceClass: PriceClass_100
+
+resources:
+  Resources:
+    WebsiteBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: ${self:custom.client.bucketName}
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+                - s3:GetObject
+              Resource: arn:aws:s3:::${self:custom.client.bucketName}/*
+
+    WebsiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.client.bucketName}
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: error.html
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Comment: WuPark Frontend Distribution
+          PriceClass: PriceClass_100
+          Origins:
+            - DomainName: ${self:custom.client.bucketName}.s3.amazonaws.com
+              Id: S3-${self:custom.client.bucketName}
+              S3OriginConfig:
+                OriginAccessIdentity: ''
+          DefaultCacheBehavior:
+            TargetOriginId: S3-${self:custom.client.bucketName}
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            DefaultTTL: 300
+            MaxTTL: 86400
+            MinTTL: 0
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          CustomErrorResponses:
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+              ErrorCachingMinTTL: 300
+            - ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+              ErrorCachingMinTTL: 300
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: true
+
+  Outputs:
+    WebsiteURL:
+      Description: "S3 Website URL"
+      Value: 
+        Fn::GetAtt: [WebsiteBucket, WebsiteURL]
+    
+    BucketName:
+      Description: "S3 Bucket Name"
+      Value:
+        Ref: WebsiteBucket
+    
+    DistributionDomainName:
+      Description: "CloudFront Distribution Domain Name"
+      Value: 
+        Fn::GetAtt: [CloudFrontDistribution, DomainName]

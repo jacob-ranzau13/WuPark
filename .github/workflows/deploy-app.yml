@@ -1,0 +1,84 @@
+name: Deploy WuPark Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  AWS_REGION: 'us-east-1'
+
+jobs:
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    if: ${{ inputs.deploy_frontend }}
+    environment: ${{ inputs.environment }}
+    needs: deploy-backend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontEnd/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        working-directory: ./frontEnd
+        run: npm ci
+
+      - name: Build application
+        working-directory: ./frontEnd
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ inputs.environment == 'production' && secrets.PROD_API_URL || secrets.STAGING_API_URL }}
+          REACT_APP_ENVIRONMENT: ${{ inputs.environment }}
+
+      - name: Deploy frontend
+        working-directory: ./frontEnd
+        run: npx serverless deploy --stage ${{ inputs.environment }}
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+      - name: Get deployment URLs
+        id: get-urls
+        run: |
+          BUCKET_NAME="wupark-frontend-${{ inputs.environment }}"
+          WEBSITE_URL=$(aws s3api get-bucket-website --bucket $BUCKET_NAME --query 'WebsiteConfiguration.IndexDocument.Suffix' --output text 2>/dev/null || echo "Not configured")
+          DISTRIBUTION_DOMAIN=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='WuPark Frontend Distribution'].DomainName" --output text 2>/dev/null || echo "Not found")
+          
+          echo "website-url=https://$BUCKET_NAME.s3-website-${{ env.AWS_REGION }}.amazonaws.com" >> $GITHUB_OUTPUT
+          echo "cloudfront-url=https://$DISTRIBUTION_DOMAIN" >> $GITHUB_OUTPUT
+
+      - name: Deployment Summary
+        run: |
+          echo "🚀 WuPark deployment completed!"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Website URL: ${{ steps.get-urls.outputs.website-url }}"
+          echo "CloudFront URL: ${{ steps.get-urls.outputs.cloudfront-url }}"

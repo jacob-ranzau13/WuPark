@@ -1,0 +1,158 @@
+name: Deploy Frontend to AWS
+
+on:
+  push:
+    branches:
+      - main
+      - aws_deploy
+    paths:
+      - 'frontEnd/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontEnd/**'
+
+env:
+  NODE_VERSION: '18'
+  AWS_DEFAULT_REGION: 'us-east-1'
+
+jobs:
+  test:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontEnd/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontEnd
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ./frontEnd
+        run: npm run lint --if-present
+
+      - name: Run tests
+        working-directory: ./frontEnd
+        run: npm test -- --coverage --watchAll=false
+
+      - name: Build application
+        working-directory: ./frontEnd
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://your-api-gateway-url.amazonaws.com/prod' }}
+          REACT_APP_ENVIRONMENT: production
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/aws_deploy' && github.event_name == 'push'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontEnd/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Install dependencies
+        working-directory: ./frontEnd
+        run: npm ci
+
+      - name: Build application
+        working-directory: ./frontEnd
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.STAGING_API_URL }}
+          REACT_APP_ENVIRONMENT: staging
+
+      - name: Deploy to AWS (Staging)
+        working-directory: ./frontEnd
+        run: npx serverless deploy --stage staging
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          SLS_DEBUG: true
+
+      - name: Invalidate CloudFront
+        run: |
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='WuPark Frontend Distribution'].Id" --output text)
+          if [ "$DISTRIBUTION_ID" != "" ]; then
+            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+          fi
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontEnd/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Install dependencies
+        working-directory: ./frontEnd
+        run: npm ci
+
+      - name: Build application
+        working-directory: ./frontEnd
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.PROD_API_URL }}
+          REACT_APP_ENVIRONMENT: production
+
+      - name: Deploy to AWS (Production)
+        working-directory: ./frontEnd
+        run: npx serverless deploy --stage prod
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          SLS_DEBUG: true
+
+      - name: Invalidate CloudFront
+        run: |
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='WuPark Frontend Distribution'].Id" --output text)
+          if [ "$DISTRIBUTION_ID" != "" ]; then
+            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+          fi
+
+      - name: Notify deployment success
+        run: |
+          echo "🚀 Frontend deployed successfully to production!"
+          echo "Website URL: https://$(aws s3api get-bucket-website --bucket wupark-frontend-prod --query 'IndexDocument.Suffix' --output text)"
