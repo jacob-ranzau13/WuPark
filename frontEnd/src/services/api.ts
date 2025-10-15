@@ -80,10 +80,9 @@ export const parseParkingData = (bytes: number[]): ParkingLotData => {
 
   const spotStatuses: boolean[] = [];
   
-  // Parse each data byte (starting from byte 2)
   for (let i = 2; i < bytes.length; i++) {
     const byte = bytes[i];
-    // Each bit represents a parking spot (1 = occupied, 0 = empty)
+   
     for (let bit = 0; bit < 8; bit++) {
       const isOccupied = (byte & (1 << bit)) !== 0;
       spotStatuses.push(isOccupied);
