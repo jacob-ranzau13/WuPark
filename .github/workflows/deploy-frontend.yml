@@ -1,15 +1,10 @@
-name: Deploy Frontend to AWS
+name: Deploy WuPark Frontend
 
 on:
   push:
     branches:
       - main
       - aws_deploy
-    paths:
-      - 'frontEnd/**'
-  pull_request:
-    branches:
-      - main
     paths:
       - 'frontEnd/**'
 
