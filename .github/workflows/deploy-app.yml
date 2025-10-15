@@ -29,7 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.deploy_frontend }}
     environment: ${{ inputs.environment }}
-    needs: deploy-backend
     
     steps:
       - name: Checkout code
