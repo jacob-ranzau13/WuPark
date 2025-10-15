@@ -42,31 +42,30 @@ export const parkingApi = {
     return response.data.data;
   },
 
-  // Get a specific parking lot by ID
+
   getParkingLot: async (lotId: number): Promise<ParkingLot> => {
     const response = await apiClient.get<ApiResponse<ParkingLot>>(`/lots/${lotId}`);
     return response.data.data;
   },
 
-  // Get real-time parking lot data
+
   getParkingLotData: async (lotId: number): Promise<ParkingLotData> => {
     const response = await apiClient.get<ApiResponse<ParkingLotData>>(`/lots/${lotId}/data`);
     return response.data.data;
   },
 
-  // Update parking lot data (for testing)
   updateParkingLotData: async (lotId: number, data: ParkingLotData): Promise<void> => {
     await apiClient.post(`/lots/${lotId}/data`, data);
   },
 
-  // Health check endpoint
+
   healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
     const response = await apiClient.get('/health');
     return response.data;
   },
 };
 
-// Utility function to parse binary parking data
+
 export const parseParkingData = (bytes: number[]): ParkingLotData => {
   if (bytes.length < 2) {
     throw new Error('Invalid data: minimum 2 bytes required');
