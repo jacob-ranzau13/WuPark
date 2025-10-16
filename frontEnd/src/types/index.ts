@@ -19,8 +19,8 @@ export interface ParkingLot {
 
 export interface ParkingLotData {
   lotNumber: number;
-  spotStatuses: boolean[]; // true = occupied, false = empty
-  byteData: number[]; // raw byte data from sensor
+  spotStatuses: boolean[]; 
+  byteData: number[]; 
 }
 
 export interface ApiResponse<T> {
