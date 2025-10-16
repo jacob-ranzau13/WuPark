@@ -129,7 +129,7 @@ const ParkingDashboard: React.FC = () => {
         </Tabs>
       </Box>
 
-      {/* Parking Lots List View */}
+   
       <TabPanel value={tabValue} index={0}>
         <Grid container spacing={3}>
           {parkingLots?.map((lot) => (
@@ -140,7 +140,7 @@ const ParkingDashboard: React.FC = () => {
         </Grid>
       </TabPanel>
 
-      {/* Map View */}
+
       <TabPanel value={tabValue} index={1}>
         <ParkingMap lots={parkingLots || []} />
       </TabPanel>

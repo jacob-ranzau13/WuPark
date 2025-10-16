@@ -25,18 +25,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontEnd/package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Clear npm authentication
+      - name: Clear npm cache and config
         run: |
+          npm cache clean --force
+          rm -rf ~/.npmrc 2>/dev/null || true
           npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
           npm config set registry https://registry.npmjs.org/
 
       - name: Install dependencies
         working-directory: ./frontEnd
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Run linter
         working-directory: ./frontEnd
@@ -68,8 +70,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontEnd/package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
       - name: Configure AWS credentials
@@ -79,14 +79,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Clear npm authentication
+      - name: Clear npm cache and config
         run: |
+          npm cache clean --force
+          rm -rf ~/.npmrc 2>/dev/null || true
           npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
           npm config set registry https://registry.npmjs.org/
 
       - name: Install dependencies
         working-directory: ./frontEnd
-        run: npm ci
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Build application
         working-directory: ./frontEnd
@@ -124,8 +128,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontEnd/package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
       - name: Configure AWS credentials
@@ -135,14 +137,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Clear npm authentication
+      - name: Clear npm cache and config
         run: |
+          npm cache clean --force
+          rm -rf ~/.npmrc 2>/dev/null || true
           npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
           npm config set registry https://registry.npmjs.org/
 
       - name: Install dependencies
         working-directory: ./frontEnd
-        run: npm ci
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
       - name: Build application
         working-directory: ./frontEnd
