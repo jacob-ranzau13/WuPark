@@ -1,6 +1,7 @@
 # =======================
 # React / Node.js
 # =======================
+.npmrc
 
 # Dependencies
 node_modules/
