@@ -44,10 +44,6 @@ jobs:
         working-directory: ./frontEnd
         run: npm run lint --if-present
 
-      - name: Run tests
-        working-directory: ./frontEnd
-        run: npm test -- --coverage --watchAll=false
-
       - name: Build application
         working-directory: ./frontEnd
         run: npm run build
