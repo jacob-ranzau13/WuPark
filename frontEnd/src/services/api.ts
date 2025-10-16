@@ -26,7 +26,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Add response interceptor for error handling
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
