@@ -4,7 +4,12 @@ frontend:
     preBuild:
       commands:
         - cd frontEnd
-        - npm ci
+        - npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+        - npm config delete _authToken 2>/dev/null || true
+        - npm config delete always-auth 2>/dev/null || true
+        - npm config set registry https://registry.npmjs.org/
+        - rm -f package-lock.json
+        - npm install --registry https://registry.npmjs.org
     build:
       commands:
         - cd frontEnd
