@@ -25,16 +25,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
+          # Don't set registry-url to avoid authentication issues
 
-      - name: Clear npm config
+      - name: Clear npm authentication and reset config
         run: |
+          # Remove any existing npm authentication
           npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          npm config delete _authToken 2>/dev/null || true
+          npm config delete //npm.pkg.github.com/:_authToken 2>/dev/null || true
+          npm config delete //kochag.pkgs.visualstudio.com/_packaging/KochAg/npm/registry/:_password 2>/dev/null || true
+          npm config delete //kochag.pkgs.visualstudio.com/_packaging/KochAg/npm/registry/:username 2>/dev/null || true
+          npm config delete always-auth 2>/dev/null || true
+          # Reset registry to public npm
           npm config set registry https://registry.npmjs.org/
+          # Clear npm cache to ensure fresh start
+          npm cache clean --force
+          # Verify config is clean
+          echo "npm config list:"
+          npm config list
 
       - name: Install dependencies
         working-directory: ./frontEnd
-        run: npm ci
+        run: |
+          # Delete package-lock.json and regenerate with public registry
+          rm -f package-lock.json
+          npm install --registry https://registry.npmjs.org
+        env:
+          # Ensure no authentication is attempted
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
 
       - name: Run linter
         working-directory: ./frontEnd
@@ -65,8 +83,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
+      - name: Clear npm config for deployment
+        run: |
+          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          npm config delete _authToken 2>/dev/null || true
+          npm config set registry https://registry.npmjs.org/
+
       - name: Install Amplify CLI
-        run: npm install -g @aws-amplify/cli
+        run: npm install -g @aws-amplify/cli --registry https://registry.npmjs.org
 
       - name: Deploy to Amplify
         working-directory: ./frontEnd
