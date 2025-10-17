@@ -69,7 +69,6 @@ const ParkingDashboard: React.FC = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
