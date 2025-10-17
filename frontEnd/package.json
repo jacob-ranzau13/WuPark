@@ -8,7 +8,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "serverless deploy"
+    "deploy": "amplify publish"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -26,9 +26,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.1.16",
-    "@types/react-dom": "^19.1.9",
-    "serverless": "^3.38.0",
-    "serverless-finch": "^4.0.0"
+    "@types/react-dom": "^19.1.9"
   },
   "proxy": "http://localhost:3001"
 }

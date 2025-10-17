@@ -1,4 +1,4 @@
-name: Deploy WuPark Frontend
+name: Deploy WuPark Frontend with Amplify
 
 on:
   push:
@@ -27,18 +27,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Clear npm cache and config
+      - name: Clear npm config
         run: |
-          npm cache clean --force
-          rm -rf ~/.npmrc 2>/dev/null || true
           npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
           npm config set registry https://registry.npmjs.org/
 
       - name: Install dependencies
         working-directory: ./frontEnd
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
+        run: npm ci
 
       - name: Run linter
         working-directory: ./frontEnd
@@ -51,22 +47,16 @@ jobs:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'https://your-api-gateway-url.amazonaws.com/prod' }}
           REACT_APP_ENVIRONMENT: production
 
-  deploy-staging:
-    name: Deploy to Staging
+  deploy-amplify:
+    name: Deploy to Amplify
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/aws_deploy' && github.event_name == 'push'
-    environment: staging
+    if: github.event_name == 'push'
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -75,99 +65,44 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Clear npm cache and config
-        run: |
-          npm cache clean --force
-          rm -rf ~/.npmrc 2>/dev/null || true
-          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
-          npm config set registry https://registry.npmjs.org/
+      - name: Install Amplify CLI
+        run: npm install -g @aws-amplify/cli
 
-      - name: Install dependencies
+      - name: Deploy to Amplify
         working-directory: ./frontEnd
         run: |
-          rm -rf node_modules package-lock.json
-          npm install
-
-      - name: Build application
-        working-directory: ./frontEnd
-        run: npm run build
+          # Set environment variables for build
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            export REACT_APP_API_URL="${{ secrets.PROD_API_URL }}"
+            export REACT_APP_ENVIRONMENT="production"
+            BRANCH_NAME="main"
+          else
+            export REACT_APP_API_URL="${{ secrets.STAGING_API_URL }}"
+            export REACT_APP_ENVIRONMENT="staging"
+            BRANCH_NAME="aws_deploy"
+          fi
+          
+          # Deploy using Amplify CLI
+          amplify publish --yes
         env:
-          REACT_APP_API_URL: ${{ secrets.STAGING_API_URL }}
-          REACT_APP_ENVIRONMENT: staging
+          AWS_REGION: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Deploy to AWS (Staging)
-        working-directory: ./frontEnd
-        run: npx serverless deploy --stage staging
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          SLS_DEBUG: true
-
-      - name: Invalidate CloudFront
+      - name: Get Amplify App URL
+        id: get-url
         run: |
-          DISTRIBUTION_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='WuPark Frontend Distribution'].Id" --output text)
-          if [ "$DISTRIBUTION_ID" != "" ]; then
-            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+          # Get the Amplify app ID from the deployment
+          APP_ID=$(aws amplify list-apps --query "apps[?name=='WuPark' || name=='frontEnd'].appId" --output text)
+          if [ -n "$APP_ID" ]; then
+            BRANCH_NAME=${{ github.ref == 'refs/heads/main' && 'main' || 'aws_deploy' }}
+            APP_URL="https://$BRANCH_NAME.$APP_ID.amplifyapp.com"
+            echo "app-url=$APP_URL" >> $GITHUB_OUTPUT
+          else
+            echo "app-url=Not available yet" >> $GITHUB_OUTPUT
           fi
 
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
-
-      - name: Clear npm cache and config
+      - name: Deployment Summary
         run: |
-          npm cache clean --force
-          rm -rf ~/.npmrc 2>/dev/null || true
-          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
-          npm config set registry https://registry.npmjs.org/
-
-      - name: Install dependencies
-        working-directory: ./frontEnd
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
-
-      - name: Build application
-        working-directory: ./frontEnd
-        run: npm run build
-        env:
-          REACT_APP_API_URL: ${{ secrets.PROD_API_URL }}
-          REACT_APP_ENVIRONMENT: production
-
-      - name: Deploy to AWS (Production)
-        working-directory: ./frontEnd
-        run: npx serverless deploy --stage prod
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          SLS_DEBUG: true
-
-      - name: Invalidate CloudFront
-        run: |
-          DISTRIBUTION_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment=='WuPark Frontend Distribution'].Id" --output text)
-          if [ "$DISTRIBUTION_ID" != "" ]; then
-            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
-          fi
-
-      - name: Notify deployment success
-        run: |
-          echo "🚀 Frontend deployed successfully to production!"
-          echo "Website URL: https://$(aws s3api get-bucket-website --bucket wupark-frontend-prod --query 'IndexDocument.Suffix' --output text)"
+          echo "🚀 WuPark Amplify deployment completed!"
+          echo "Environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}"
+          echo "Branch: ${{ github.ref == 'refs/heads/main' && 'main' || 'aws_deploy' }}"
+          echo "App URL: ${{ steps.get-url.outputs.app-url }}"
