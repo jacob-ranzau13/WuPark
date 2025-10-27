@@ -97,5 +97,18 @@ export const useParkingLotData = (lotId: number): UseQueryResult<ParkingLotData,
   );
 };
 export const useParkingSpots = (lotId: number): UseQueryResult<ParkingSpot[], Error> => {
+  return useQuery(
+    ['parkingSpots', lotId],
+    () => {
+      const lot = MOCK_PARKING_LOTS.find(l => l.id === lotId);
+      if (!lot) {
+        return Promise.reject(new Error('Lot not found'));
+      }
+      return Promise.resolve(lot.spots);
+    },
+    {
+      enabled: !!lotId,
+      refetchInterval: 10000, // Refresh every 10 seconds
+    }
+  );
 };
-
