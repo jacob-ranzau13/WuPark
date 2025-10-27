@@ -1,15 +1,70 @@
 import { useQuery, UseQueryResult } from 'react-query';
-import { parkingApi } from '../services/api';
-import { ParkingLot, ParkingLotData } from '../types';
+import { ParkingLot, ParkingLotData, ParkingSpot } from '../types';
 
+// Mock data
+const generateMockSpots = (count: number, lotId: number): ParkingSpot[] => {
+  return Array(count).fill(null).map((_, index) => ({
+    id: index + 1,
+    isOccupied: Math.random() > 0.7,
+    lotId
+  }));
+};
+
+const MOCK_PARKING_LOTS: ParkingLot[] = [
+  {
+    id: 1,
+    name: 'Main Parking',
+    location: { lat: 44.0121, lng: -92.4802 },
+    spots: generateMockSpots(100, 1),
+    totalSpots: 100,
+    occupiedSpots: 25,
+    lastUpdated: new Date()
+  },
+  {
+    id: 2,
+    name: 'North Parking',
+    location: { lat: 44.0131, lng: -92.4812 },
+    spots: generateMockSpots(50, 2),
+    totalSpots: 50,
+    occupiedSpots: 20,
+    lastUpdated: new Date()
+  },
+  {
+    id: 3,
+    name: 'South Parking',
+    location: { lat: 44.0111, lng: -92.4792 },
+    spots: generateMockSpots(75, 3),
+    totalSpots: 75,
+    occupiedSpots: 30,
+    lastUpdated: new Date()
+  }
+];
+
+const MOCK_PARKING_DATA: Record<number, ParkingLotData> = {
+  1: { 
+    lotNumber: 1, 
+    spotStatuses: Array(100).fill(false).map(() => Math.random() > 0.75),
+    byteData: [100, 1, ...Array(12).fill(0).map(() => Math.floor(Math.random() * 256))]
+  },
+  2: { 
+    lotNumber: 2, 
+    spotStatuses: Array(50).fill(false).map(() => Math.random() > 0.6),
+    byteData: [50, 2, ...Array(6).fill(0).map(() => Math.floor(Math.random() * 256))]
+  },
+  3: { 
+    lotNumber: 3, 
+    spotStatuses: Array(75).fill(false).map(() => Math.random() > 0.6),
+    byteData: [75, 3, ...Array(9).fill(0).map(() => Math.floor(Math.random() * 256))]
+  }
+};
 
 export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
   return useQuery(
     'parkingLots',
-    parkingApi.getAllParkingLots,
+    () => Promise.resolve(MOCK_PARKING_LOTS),
     {
-      refetchInterval: 30000, 
-      staleTime: 10000, 
+      refetchInterval: 30000,
+      staleTime: 10000,
     }
   );
 };
@@ -17,10 +72,13 @@ export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
 export const useParkingLot = (lotId: number): UseQueryResult<ParkingLot, Error> => {
   return useQuery(
     ['parkingLot', lotId],
-    () => parkingApi.getParkingLot(lotId),
+    () => {
+      const lot = MOCK_PARKING_LOTS.find(l => l.id === lotId);
+      return Promise.resolve(lot || Promise.reject(new Error('Lot not found')));
+    },
     {
       enabled: !!lotId,
-      refetchInterval: 15000, 
+      refetchInterval: 15000,
     }
   );
 };
@@ -28,22 +86,16 @@ export const useParkingLot = (lotId: number): UseQueryResult<ParkingLot, Error> 
 export const useParkingLotData = (lotId: number): UseQueryResult<ParkingLotData, Error> => {
   return useQuery(
     ['parkingLotData', lotId],
-    () => parkingApi.getParkingLotData(lotId),
+    () => {
+      const data = MOCK_PARKING_DATA[lotId];
+      return Promise.resolve(data || Promise.reject(new Error('Parking data not found')));
+    },
     {
       enabled: !!lotId,
-      refetchInterval: 5000, 
+      refetchInterval: 5000, // Refresh every 5 seconds
     }
   );
 };
-
-
-export const useHealthCheck = (): UseQueryResult<{ status: string; timestamp: string }, Error> => {
-  return useQuery(
-    'healthCheck',
-    parkingApi.healthCheck,
-    {
-      refetchInterval: 60000, 
-      retry: 3,
-    }
-  );
+export const useParkingSpots = (lotId: number): UseQueryResult<ParkingSpot[], Error> => {
 };
+
