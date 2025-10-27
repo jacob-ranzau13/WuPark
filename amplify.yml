@@ -16,4 +16,16 @@ frontend:
   cache:
     paths:
       - frontEnd/node_modules/**/*
+  customHeaders:
+    - pattern: '**/*'
+      headers:
+        - key: 'Strict-Transport-Security'
+          value: 'max-age=31536000; includeSubDomains'
+        - key: 'X-Frame-Options'
+          value: 'SAMEORIGIN'
+        - key: 'X-XSS-Protection'
+          value: '1; mode=block'
+  environment:
+    variables:
+      REACT_APP_API_URL: your-actual-api-gateway-url
       - frontEnd/node_modules/**/*

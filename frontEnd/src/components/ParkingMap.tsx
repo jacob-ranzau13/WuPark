@@ -1,12 +1,10 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import { Box, Typography, Chip, Card, CardContent } from '@mui/material';
-import { LocationOn } from '@mui/icons-material';
-import { ParkingLot } from '../types';
+import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Box } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-
+// Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -14,40 +12,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Example parking locations
+const SAMPLE_LOCATIONS = [
+  { id: 1, name: 'Main Parking', position: [44.0121, -92.4802], spaces: 100 },
+  { id: 2, name: 'North Parking', position: [44.0131, -92.4812], spaces: 75 },
+  { id: 3, name: 'South Parking', position: [44.0111, -92.4792], spaces: 50 },
+];
 
-const createParkingIcon = (occupancyRate: number) => {
-  const color = occupancyRate < 50 ? 'green' : occupancyRate < 80 ? 'orange' : 'red';
-  
-  return L.divIcon({
-    html: `
-      <div style="
-        background-color: ${color};
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 12px;
-      ">
-        P
-      </div>
-    `,
-    className: 'custom-parking-icon',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-  });
-};
-
-interface MapControllerProps {
-  lots: ParkingLot[];
-}
-
-const MapController: React.FC<MapControllerProps> = ({ lots }) => {
+const ParkingMap: React.FC = () => {
   const map = useMap();
 
   useEffect(() => {
