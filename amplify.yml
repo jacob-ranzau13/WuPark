@@ -3,24 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
-        - 'echo "=== DEBUG: Listing root directory ==="'
-        - ls -la
-        - 'echo "=== DEBUG: Checking if frontEnd exists ==="'
-        - 'test -d frontEnd && echo "frontEnd directory exists" || echo "frontEnd directory NOT found"'
-        - 'test -d FrontEnd && echo "FrontEnd directory exists" || echo "FrontEnd directory NOT found"'
-        - 'echo "=== Changing to frontend directory ==="'
         - cd frontEnd
-        - 'echo "=== Clearing npm config ==="'
-        - 'npm config delete "//registry.npmjs.org/:_authToken" 2>/dev/null || true'
-        - 'npm config delete "_authToken" 2>/dev/null || true'
-        - 'npm config delete "always-auth" 2>/dev/null || true'
-        - 'npm config set registry "https://registry.npmjs.org/"'
-        - 'echo "=== Installing dependencies ==="'
-        - rm -f package-lock.json
-        - 'npm install --registry "https://registry.npmjs.org"'
+        - npm ci
     build:
       commands:
-        - cd frontEnd
         - npm run build
   artifacts:
     baseDirectory: frontEnd/build
@@ -28,5 +14,5 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - frontEnd/node_modules/**/*
       - frontEnd/node_modules/**/*
