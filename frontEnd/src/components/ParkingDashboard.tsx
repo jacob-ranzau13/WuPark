@@ -123,7 +123,7 @@ const ParkingDashboard: React.FC = () => {
       {/* Tabs for different views */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="parking dashboard tabs">
-          <Tab icon={<LocalParking />} label="Parking Lots" />
+         <Tab icon={<LocalParking />} label="Parking Lots" />
           <Tab icon={<MapIcon />} label="Map View" />
         </Tabs>
       </Box>
