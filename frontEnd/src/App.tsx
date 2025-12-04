@@ -4,6 +4,7 @@ import { LocalParking } from '@mui/icons-material';
 import ParkingMap from './components/ParkingMap';
 import { logger } from './utils/logger';
 import { useParkingLots } from './hooks/useParkingData';
+import LotDemo from './assets/LotDemo.png';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -26,13 +27,16 @@ const App: React.FC = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             WuPark - Smart Parking Management
           </Typography>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="body2" component="div" sx={{ mr: 2, color: 'rgba(255,255,255,0.85)' }}>
             This application is incomplete and is for demonstration purposes only.
           </Typography>
         </Toolbar>
       </AppBar>
       <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         <ParkingMap lots={parkingLots || []} />
+      </Container>
+      <Container>
+        <Box component="img" src={LotDemo} alt="Lot demo" sx={{ height: 40, ml: 1 }} />
       </Container>
     </Box>
   );

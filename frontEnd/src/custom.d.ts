@@ -1,0 +1,1 @@
+declare module '*.png'; { /* typescript needs to be handheld into understanding image imports */ }
