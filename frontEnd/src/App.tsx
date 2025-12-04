@@ -27,7 +27,7 @@ const App: React.FC = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             WuPark - Smart Parking Management
           </Typography>
-          <Typography variant="body2" component="div" sx={{ mr: 2, color: 'rgba(255,255,255,0.85)' }}>
+          <Typography variant="body2" component="div" sx={{ mr: 2, color: '#000000' }}>
             This application is incomplete and is for demonstration purposes only.
           </Typography>
         </Toolbar>
@@ -36,7 +36,7 @@ const App: React.FC = () => {
         <ParkingMap lots={parkingLots || []} />
       </Container>
       <Container>
-        <Box component="img" src={LotDemo} alt="Lot demo" sx={{ height: 40, ml: 1 }} />
+        <Box component="img" src={LotDemo} alt="Lot demo" sx={{ height: 400, display: 'block', mx: 'auto' }}/>
       </Container>
     </Box>
   );
