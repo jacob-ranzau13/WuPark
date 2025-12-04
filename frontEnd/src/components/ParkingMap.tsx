@@ -48,8 +48,8 @@ interface ParkingMapProps {
 }
 
 const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
-  const center: [number, number] = [44.0121, -92.4802]; // Rochester, MN coordinates
-  const zoom = 15;
+  const center: [number, number] = [37.7191, -97.2917]; // Rochester, MN coordinates
+  const zoom = 16;
 
   return (
     <Box sx={{ height: 'calc(100vh - 64px)', width: '100%', position: 'relative' }}>

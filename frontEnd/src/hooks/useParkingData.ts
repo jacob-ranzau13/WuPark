@@ -14,7 +14,7 @@ const MOCK_PARKING_LOTS: ParkingLot[] = [
   {
     id: 1,
     name: 'Main Parking',
-    location: { lat: 44.0121, lng: -92.4802 },
+    location: { lat: 37.7191, lng: -97.2985 },
     spots: generateMockSpots(100, 1),
     totalSpots: 100,
     occupiedSpots: 25,
@@ -23,7 +23,7 @@ const MOCK_PARKING_LOTS: ParkingLot[] = [
   {
     id: 2,
     name: 'North Parking',
-    location: { lat: 44.0131, lng: -92.4812 },
+    location: { lat: 37.722, lng: -97.2905 },
     spots: generateMockSpots(50, 2),
     totalSpots: 50,
     occupiedSpots: 20,
@@ -32,7 +32,7 @@ const MOCK_PARKING_LOTS: ParkingLot[] = [
   {
     id: 3,
     name: 'South Parking',
-    location: { lat: 44.0111, lng: -92.4792 },
+    location: { lat: 37.7165, lng: -97.2856 },
     spots: generateMockSpots(75, 3),
     totalSpots: 75,
     occupiedSpots: 30,

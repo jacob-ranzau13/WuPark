@@ -17,6 +17,15 @@ export interface ParkingLot {
   lastUpdated: Date;
 }
 
+export interface ActualLot {
+  lotNum: number;
+  name: string;
+  spots: ParkingSpot[];
+  totalSpots: number;
+  occupiedSpots: number;
+  lastUpdated: string; 
+}
+
 export interface ParkingLotData {
   lotNumber: number;
   spotStatuses: boolean[]; 
