@@ -5,6 +5,7 @@ import ParkingMap from './components/ParkingMap';
 import { logger } from './utils/logger';
 import { useParkingLots } from './hooks/useParkingData';
 import LotDemo from './assets/LotDemo.png';
+import WuParkLogo from './assets/WuPark Logo 2.jpg';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
+          <Box component="img" src={WuParkLogo} alt="WuPark Logo" sx={{ height: 50, mr: 2 }} />
           <LocalParking sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             WuPark - Smart Parking Management
