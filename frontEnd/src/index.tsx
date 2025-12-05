@@ -15,6 +15,10 @@ const theme = createTheme({
       main: '#ffffffff',
     },
   },
+  typography: {
+    // Use system fonts to avoid external Google Fonts requests (fix CSP blocks)
+    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  },
 });
 
 const queryClient = new QueryClient({
