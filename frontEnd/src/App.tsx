@@ -24,11 +24,10 @@ const App: React.FC = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Box component="img" src={WuParkLogo} alt="WuPark Logo" sx={{ height: 50, mr: 2 }} />
+          <Box component="img" src={WuParkLogo} alt="WuPark Logo" sx={{ height: 50, mr: 2 }} /> 
           <LocalParking sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            WuPark - Smart Parking Management
-          </Typography>
+          {/* Remove the title text but keep layout and the informational introduced by the pull */}
+          <Box sx={{ flexGrow: 1 }} />
           <Typography variant="body2" component="div" sx={{ mr: 2, color: '#000000' }}>
             This application is incomplete and is for demonstration purposes only.
           </Typography>

@@ -2,5 +2,9 @@
   "dependencies": {
     "@mui/icons-material": "^7.3.4",
     "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@types/react-dom": "^19.2.3",
+    "@types/react-query": "^1.2.8"
   }
 }
