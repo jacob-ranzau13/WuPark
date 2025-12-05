@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { Container, AppBar, Toolbar, Typography, Box } from '@mui/material';
 import { LocalParking } from '@mui/icons-material';
 import ParkingMap from './components/ParkingMap';
+import ParkingLotVisualizer from './components/ParkingLotVisualizer';
 import { logger } from './utils/logger';
 import { useParkingLots } from './hooks/useParkingData';
-import LotDemo from './assets/LotDemo.png';
 import WuParkLogo from './assets/WuPark Logo 2.jpg';
 
 const App: React.FC = () => {
@@ -37,8 +37,8 @@ const App: React.FC = () => {
       <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         <ParkingMap lots={parkingLots || []} />
       </Container>
-      <Container>
-        <Box component="img" src={LotDemo} alt="Lot demo" sx={{ height: 400, display: 'block', mx: 'auto' }}/>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+        <ParkingLotVisualizer lotId={1} />
       </Container>
     </Box>
   );

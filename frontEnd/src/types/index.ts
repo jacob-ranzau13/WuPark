@@ -1,5 +1,5 @@
 export interface ParkingSpot {
-  id: number;
+  id: string;
   isOccupied: boolean;
   lotId: number;
 }
@@ -15,6 +15,31 @@ export interface ParkingLot {
   totalSpots: number;
   occupiedSpots: number;
   lastUpdated: Date;
+}
+export interface DynamoDBSpotStatus {
+  M: {
+    occupied: {
+      BOOL: boolean;
+    };
+  };
+}
+
+export interface DynamoDBAvailability {
+  [spotId: string]: DynamoDBSpotStatus;
+}
+
+export interface ApiParkingLotResponse {
+  lotNum: string;
+  timestamp: string;
+  availability: string;
+}
+
+export interface ParsedParkingLotData {
+  lotNum: number;
+  timestamp: number;
+  spots: Record<string, boolean>;
+  totalSpots: number;
+  occupiedSpots: number;
 }
 
 export interface ActualLot {

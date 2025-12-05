@@ -8,6 +8,7 @@ frontend:
         - npm install
     build:
       commands:
+        - echo "REACT_APP_API_URL=$API_URL" > .env.production
         - npm run build
   artifacts:
     baseDirectory: frontEnd/build

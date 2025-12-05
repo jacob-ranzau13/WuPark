@@ -1,70 +1,47 @@
 import { useQuery, UseQueryResult } from 'react-query';
-import { ParkingLot, ParkingLotData, ParkingSpot } from '../types';
+import { ParkingLot, ParkingSpot, ParsedParkingLotData } from '../types';
+import { fetchParkingLotData, fetchAllParkingLots } from '../services/parkingApi';
+import { logger } from '../utils/logger';
 
-// Mock data
-const generateMockSpots = (count: number, lotId: number): ParkingSpot[] => {
-  return Array(count).fill(null).map((_, index) => ({
-    id: index + 1,
-    isOccupied: Math.random() > 0.7,
-    lotId
+const POLLING_INTERVAL = 10000; 
+
+const convertToParkingLot = (data: ParsedParkingLotData, index: number): ParkingLot => {
+  const spots: ParkingSpot[] = Object.entries(data.spots).map(([spotId, isOccupied]) => ({
+    id: spotId,
+    isOccupied,
+    lotId: data.lotNum
   }));
-};
 
-const MOCK_PARKING_LOTS: ParkingLot[] = [
-  {
-    id: 1,
-    name: 'Main Parking',
-    location: { lat: 37.7191, lng: -97.2985 },
-    spots: generateMockSpots(100, 1),
-    totalSpots: 100,
-    occupiedSpots: 25,
-    lastUpdated: new Date()
-  },
-  {
-    id: 2,
-    name: 'North Parking',
-    location: { lat: 37.722, lng: -97.2905 },
-    spots: generateMockSpots(50, 2),
-    totalSpots: 50,
-    occupiedSpots: 20,
-    lastUpdated: new Date()
-  },
-  {
-    id: 3,
-    name: 'South Parking',
-    location: { lat: 37.7165, lng: -97.2856 },
-    spots: generateMockSpots(75, 3),
-    totalSpots: 75,
-    occupiedSpots: 30,
-    lastUpdated: new Date()
-  }
-];
+  const mockLocations = [
+    { lat: 37.7191, lng: -97.2985 },
+    { lat: 37.722, lng: -97.2905 },
+    { lat: 37.7165, lng: -97.2856 }
+  ];
 
-const MOCK_PARKING_DATA: Record<number, ParkingLotData> = {
-  1: { 
-    lotNumber: 1, 
-    spotStatuses: Array(100).fill(false).map(() => Math.random() > 0.75),
-    byteData: [100, 1, ...Array(12).fill(0).map(() => Math.floor(Math.random() * 256))]
-  },
-  2: { 
-    lotNumber: 2, 
-    spotStatuses: Array(50).fill(false).map(() => Math.random() > 0.6),
-    byteData: [50, 2, ...Array(6).fill(0).map(() => Math.floor(Math.random() * 256))]
-  },
-  3: { 
-    lotNumber: 3, 
-    spotStatuses: Array(75).fill(false).map(() => Math.random() > 0.6),
-    byteData: [75, 3, ...Array(9).fill(0).map(() => Math.floor(Math.random() * 256))]
-  }
+  return {
+    id: data.lotNum,
+    name: `Parking Lot ${data.lotNum}`,
+    location: mockLocations[index] || mockLocations[0],
+    spots,
+    totalSpots: data.totalSpots,
+    occupiedSpots: data.occupiedSpots,
+    lastUpdated: new Date(data.timestamp * 1000)
+  };
 };
 
 export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
   return useQuery(
     'parkingLots',
-    () => Promise.resolve(MOCK_PARKING_LOTS),
+    async () => {
+      const data = await fetchAllParkingLots();
+      return data.map((lot, index) => convertToParkingLot(lot, index));
+    },
     {
-      refetchInterval: 30000,
-      staleTime: 10000,
+      refetchInterval: POLLING_INTERVAL,
+      staleTime: 5000,
+      onError: (error) => {
+        logger.error('Failed to fetch parking lots', { error });
+      }
     }
   );
 };
@@ -72,43 +49,57 @@ export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
 export const useParkingLot = (lotId: number): UseQueryResult<ParkingLot, Error> => {
   return useQuery(
     ['parkingLot', lotId],
-    () => {
-      const lot = MOCK_PARKING_LOTS.find(l => l.id === lotId);
-      return Promise.resolve(lot || Promise.reject(new Error('Lot not found')));
+    async () => {
+      const data = await fetchParkingLotData(lotId);
+      return convertToParkingLot(data, lotId - 1);
     },
     {
       enabled: !!lotId,
-      refetchInterval: 15000,
+      refetchInterval: POLLING_INTERVAL,
+      onError: (error) => {
+        logger.error('Failed to fetch parking lot', { error, lotId });
+      }
     }
   );
 };
 
-export const useParkingLotData = (lotId: number): UseQueryResult<ParkingLotData, Error> => {
+export const useParkingLotData = (lotId: number): UseQueryResult<ParsedParkingLotData, Error> => {
   return useQuery(
     ['parkingLotData', lotId],
-    () => {
-      const data = MOCK_PARKING_DATA[lotId];
-      return Promise.resolve(data || Promise.reject(new Error('Parking data not found')));
+    async () => {
+      return await fetchParkingLotData(lotId);
     },
     {
       enabled: !!lotId,
-      refetchInterval: 5000, // Refresh every 5 seconds
+      refetchInterval: POLLING_INTERVAL,
+      onError: (error) => {
+        logger.error('Failed to fetch parking lot data', { error, lotId });
+      }
     }
   );
 };
+
 export const useParkingSpots = (lotId: number): UseQueryResult<ParkingSpot[], Error> => {
+  const { data: lotData } = useParkingLotData(lotId);
+  
   return useQuery(
     ['parkingSpots', lotId],
     () => {
-      const lot = MOCK_PARKING_LOTS.find(l => l.id === lotId);
-      if (!lot) {
-        return Promise.reject(new Error('Lot not found'));
+      if (!lotData) {
+        return Promise.reject(new Error('Lot data not available'));
       }
-      return Promise.resolve(lot.spots);
+      
+      const spots: ParkingSpot[] = Object.entries(lotData.spots).map(([spotId, isOccupied]) => ({
+        id: spotId,
+        isOccupied,
+        lotId
+      }));
+      
+      return Promise.resolve(spots);
     },
     {
-      enabled: !!lotId,
-      refetchInterval: 10000, // Refresh every 10 seconds
+      enabled: !!lotId && !!lotData,
+      refetchInterval: POLLING_INTERVAL,
     }
   );
 };
