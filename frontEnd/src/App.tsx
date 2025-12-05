@@ -42,11 +42,21 @@ const App: React.FC = () => {
       { x: 92, y: 18 },
     ];
 
-    return firstLot.spots.slice(0, 8).map((spot, index) => ({
+    // If the API returns spots keyed by ids (A1..A8) we should map by those keys so order is stable.
+    const spotKeys = ['A1','A2','A3','A4','A5','A6','A7','A8'];
+
+    // build lookup from the ParkingSpot[] (id:string) to occupancy
+    const spotMap: Record<string, boolean> = {};
+    for (const s of firstLot.spots) {
+      spotMap[s.id] = s.isOccupied;
+    }
+
+    return spotKeys.map((key, index) => ({
       id: index + 1,
+      label: key,
       x: stallPositions[index].x,
       y: stallPositions[index].y,
-      status: spot.isOccupied ? 'occupied' : 'free'
+      status: spotMap[key] ? 'occupied' : 'free'
     }));
   };
 
