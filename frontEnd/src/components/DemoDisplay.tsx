@@ -96,6 +96,12 @@ const DemoDisplay: React.FC<DemoDisplayProps> = ({ imageSrc, stalls, lotNum, las
           const pos = computed[s.id];
           const left = pos ? `${pos.x}%` : (typeof s.x === 'number' ? `${s.x}%` : '0%');
           const top = pos ? `${pos.y}%` : (typeof s.y === 'number' ? `${s.y}%` : '0%');
+
+          // determine label text (strip leading 'A' if present)
+          const rawLabel = s.label ?? String(s.id);
+          const labelText = rawLabel.toString().startsWith('A') ? rawLabel.toString().slice(1) : rawLabel.toString();
+          const showLeft = Number(s.id) >= 5; // stalls 5-8 show label left
+
           return (
             <Box
               key={s.id}
@@ -105,14 +111,25 @@ const DemoDisplay: React.FC<DemoDisplayProps> = ({ imageSrc, stalls, lotNum, las
                 left,
                 top,
                 transform: 'translate(-50%, -50%)',
-                width: 14,
-                height: 14,
-                borderRadius: '50%',
-                backgroundColor: statusColor(s.status),
-                border: '2px solid #fff',
-                boxShadow: '0 0 6px rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'auto',
               }}
-            />
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexDirection: showLeft ? 'row-reverse' : 'row' }}>
+                <Box
+                  sx={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50%',
+                    backgroundColor: statusColor(s.status),
+                    border: '2px solid #fff',
+                    boxShadow: '0 0 6px rgba(0,0,0,0.3)',
+                  }}
+                />
+                <Typography variant="caption" sx={{ userSelect: 'none' }}>{labelText}</Typography>
+              </Box>
+            </Box>
           );
         })}
       </Box>
