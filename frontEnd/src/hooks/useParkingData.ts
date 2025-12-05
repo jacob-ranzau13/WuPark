@@ -3,7 +3,7 @@ import { ParkingLot, ParkingSpot, ParsedParkingLotData } from '../types';
 import { fetchParkingLotData, fetchAllParkingLots } from '../services/parkingApi';
 import { logger } from '../utils/logger';
 
-const POLLING_INTERVAL = 30000; // poll every 30 seconds while debugging
+const POLLING_INTERVAL = 10000; // poll every 10 seconds
 
 const convertToParkingLot = (data: ParsedParkingLotData, index: number): ParkingLot => {
   const spots: ParkingSpot[] = Object.entries(data.spots).map(([spotId, isOccupied]) => ({
