@@ -29,11 +29,12 @@ const parseAvailability = (availabilityRaw: any): Record<string, boolean> => {
     const spots: Record<string, boolean> = {};
 
     for (const [spotId, spotData] of Object.entries(parsed)) {
-      const value = (spotData && spotData.M && spotData.M.occupied && typeof spotData.M.occupied.BOOL === 'boolean')
-        ? spotData.M.occupied.BOOL
-        : (spotData && typeof spotData === 'object' && typeof (spotData as any).occupied === 'boolean')
-          ? (spotData as any).occupied
-          : (typeof spotData === 'boolean' ? spotData : undefined);
+      const s = spotData as any;
+      const value = (s && s.M && s.M.occupied && typeof s.M.occupied.BOOL === 'boolean')
+        ? s.M.occupied.BOOL
+        : (s && typeof s === 'object' && typeof s.occupied === 'boolean')
+          ? s.occupied
+          : (typeof s === 'boolean' ? s : undefined);
 
       if (typeof value === 'boolean') {
         spots[spotId] = value;
