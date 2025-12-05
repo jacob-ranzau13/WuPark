@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Container, AppBar, Toolbar, Typography, Box, Tabs, Tab } from '@mui/material';
-import { LocalParking } from '@mui/icons-material';
 import ParkingMap from './components/ParkingMap';
 import DemoDisplay, { Stall } from './components/DemoDisplay';
 import LotDemo from './assets/LotDemo.png';
@@ -71,7 +70,6 @@ const App: React.FC = () => {
       <AppBar position="static">
         <Toolbar>
           <Box component="img" src={WuParkLogo} alt="WuPark Logo" sx={{ height: 50, mr: 2 }} /> 
-          <LocalParking sx={{ mr: 2 }} />
           <Box sx={{ flexGrow: 1 }} />
           <Typography variant="body2" component="div" sx={{ mr: 2, color: '#000000' }}>
             This application is incomplete and is for demonstration purposes only.
