@@ -21,30 +21,26 @@ const parseAvailability = (availabilityRaw: any): Record<string, boolean> => {
       parsed = JSON.parse(availabilityRaw);
     }
 
+    // If DynamoDB wrapped the map under { M: { ... } }, unwrap it
+    if (parsed && typeof parsed === 'object' && parsed.M && typeof parsed.M === 'object') {
+      parsed = parsed.M;
+    }
+
     const spots: Record<string, boolean> = {};
 
     for (const [spotId, spotData] of Object.entries(parsed)) {
-      // handle DynamoDB wire format: { M: { occupied: { BOOL: true }}}
-      if (spotData && typeof spotData === 'object' && spotData.M && spotData.M.occupied && typeof spotData.M.occupied.BOOL === 'boolean') {
-        spots[spotId] = spotData.M.occupied.BOOL;
-        continue;
-      }
+      const value = (spotData && spotData.M && spotData.M.occupied && typeof spotData.M.occupied.BOOL === 'boolean')
+        ? spotData.M.occupied.BOOL
+        : (spotData && typeof spotData === 'object' && typeof (spotData as any).occupied === 'boolean')
+          ? (spotData as any).occupied
+          : (typeof spotData === 'boolean' ? spotData : undefined);
 
-      // handle simpler format: { occupied: true }
-      if (spotData && typeof spotData === 'object' && typeof (spotData as any).occupied === 'boolean') {
-        spots[spotId] = (spotData as any).occupied;
-        continue;
+      if (typeof value === 'boolean') {
+        spots[spotId] = value;
+      } else {
+        logger.error('Unknown spot data shape', { spotId, spotData });
+        spots[spotId] = false;
       }
-
-      // handle direct boolean value
-      if (typeof spotData === 'boolean') {
-        spots[spotId] = spotData as boolean;
-        continue;
-      }
-
-      // unknown shape - default to false and log
-      logger.error('Unknown spot data shape', { spotId, spotData });
-      spots[spotId] = false;
     }
 
     return spots;
@@ -52,6 +48,14 @@ const parseAvailability = (availabilityRaw: any): Record<string, boolean> => {
     logger.error('Failed to parse availability data', { error, availabilityRaw });
     throw new Error('Invalid availability data format');
   }
+};
+
+const unwrapNumber = (v: any): number => {
+  if (v === undefined || v === null) return NaN;
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string') return parseInt(v, 10);
+  if (typeof v === 'object' && v.N) return parseInt(v.N, 10);
+  return NaN;
 };
 
 const pickLatestByLot = (items: ApiParkingLotResponse[] | ApiParkingLotResponse): ApiParkingLotResponse[] => {
@@ -92,8 +96,17 @@ export const fetchParkingLotData = async (lotNum: number): Promise<ParsedParking
       throw new Error('Invalid JSON received from API');
     }
 
+    // Some endpoints wrap the real payload in { message, data: { ... } }
+    // Normalize that so we always work with ApiParkingLotResponse or array thereof
+    let normalized: ApiParkingLotResponse | ApiParkingLotResponse[];
+    if ((parsed as any).data && ((parsed as any).message || (parsed as any).data)) {
+      normalized = (parsed as any).data as ApiParkingLotResponse;
+    } else {
+      normalized = parsed as ApiParkingLotResponse | ApiParkingLotResponse[];
+    }
+
     // If the API returned multiple records for the lot, pick the most recent by timestamp
-    const candidates = pickLatestByLot(parsed);
+    const candidates = pickLatestByLot(normalized);
     if (candidates.length > 1) {
       logger.info('Multiple records returned for lot; using most recent by timestamp', { url: `${base}/${lotNum}`, candidatesCount: candidates.length });
     }
@@ -149,8 +162,16 @@ export const fetchAllParkingLots = async (): Promise<ParsedParkingLotData[]> => 
       throw new Error('Invalid JSON received from API');
     }
 
+    // Normalize wrapper(s) like { message, data: [...] } or { message, data: {...} }
+    let normalizedAll: ApiParkingLotResponse[] | ApiParkingLotResponse;
+    if ((parsed as any).data && ((parsed as any).message || (parsed as any).data)) {
+      normalizedAll = (parsed as any).data;
+    } else {
+      normalizedAll = parsed as ApiParkingLotResponse[] | ApiParkingLotResponse;
+    }
+
     // Ensure we only use the most recent record per lotNum
-    const data = pickLatestByLot(parsed);
+    const data = pickLatestByLot(normalizedAll);
 
     return data.map(lot => {
       const spots = parseAvailability(lot.availability);
