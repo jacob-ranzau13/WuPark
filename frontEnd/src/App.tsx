@@ -31,15 +31,16 @@ const App: React.FC = () => {
     if (!parkingLots || parkingLots.length === 0) return [];
     
     const firstLot = parkingLots[0];
+    // pixel coordinates provided by user for LotDemo image (xPx, yPx)
     const stallPositions = [
-      { x: 12, y: 18 },
-      { x: 24, y: 18 },
-      { x: 36, y: 18 },
-      { x: 48, y: 18 },
-      { x: 60, y: 18 },
-      { x: 72, y: 18 },
-      { x: 84, y: 18 },
-      { x: 92, y: 18 },
+      { xPx: 241, yPx: 101 },
+      { xPx: 241, yPx: 141 },
+      { xPx: 241, yPx: 181 },
+      { xPx: 241, yPx: 221 },
+      { xPx: 470, yPx: 101 },
+      { xPx: 470, yPx: 141 },
+      { xPx: 470, yPx: 181 },
+      { xPx: 470, yPx: 221 },
     ];
 
     // If the API returns spots keyed by ids (A1..A8) we should map by those keys so order is stable.
@@ -54,8 +55,8 @@ const App: React.FC = () => {
     return spotKeys.map((key, index) => ({
       id: index + 1,
       label: key,
-      x: stallPositions[index].x,
-      y: stallPositions[index].y,
+      xPx: (stallPositions[index] as any).xPx,
+      yPx: (stallPositions[index] as any).yPx,
       status: spotMap[key] ? 'occupied' : 'free'
     }));
   };
