@@ -28,6 +28,20 @@ const parseAvailability = (availabilityString: string): Record<string, boolean> 
   }
 };
 
+const pickLatestByLot = (items: ApiParkingLotResponse[] | ApiParkingLotResponse): ApiParkingLotResponse[] => {
+  if (!Array.isArray(items)) return [items];
+
+  const latestMap: Record<string, ApiParkingLotResponse> = {};
+  for (const it of items) {
+    const lotKey = it.lotNum;
+    const ts = parseInt(it.timestamp as any);
+    if (!latestMap[lotKey] || parseInt(latestMap[lotKey].timestamp as any) < ts) {
+      latestMap[lotKey] = it;
+    }
+  }
+  return Object.values(latestMap);
+};
+
 export const fetchParkingLotData = async (lotNum: number): Promise<ParsedParkingLotData> => {
   try {
     logger.info('Fetching parking lot data', { lotNum });
@@ -44,13 +58,20 @@ export const fetchParkingLotData = async (lotNum: number): Promise<ParsedParking
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    let data: ApiParkingLotResponse;
+    let parsed: ApiParkingLotResponse | ApiParkingLotResponse[];
     try {
-      data = JSON.parse(rawText) as ApiParkingLotResponse;
+      parsed = JSON.parse(rawText) as ApiParkingLotResponse | ApiParkingLotResponse[];
     } catch (err) {
       logger.error('Failed to parse JSON from API response', { url: `${base}/${lotNum}`, rawText, error: err });
       throw new Error('Invalid JSON received from API');
     }
+
+    // If the API returned multiple records for the lot, pick the most recent by timestamp
+    const candidates = pickLatestByLot(parsed);
+    if (candidates.length > 1) {
+      logger.info('Multiple records returned for lot; using most recent by timestamp', { url: `${base}/${lotNum}`, candidatesCount: candidates.length });
+    }
+    const data = candidates[0];
     
     const spots = parseAvailability(data.availability);
     const occupiedSpots = Object.values(spots).filter(occupied => occupied).length;
@@ -94,14 +115,17 @@ export const fetchAllParkingLots = async (): Promise<ParsedParkingLotData[]> => 
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    let data: ApiParkingLotResponse[];
+    let parsed: ApiParkingLotResponse[] | ApiParkingLotResponse;
     try {
-      data = JSON.parse(rawText) as ApiParkingLotResponse[];
+      parsed = JSON.parse(rawText) as ApiParkingLotResponse[] | ApiParkingLotResponse;
     } catch (err) {
       logger.error('Failed to parse JSON from API response', { url: base, rawText, error: err });
       throw new Error('Invalid JSON received from API');
     }
-    
+
+    // Ensure we only use the most recent record per lotNum
+    const data = pickLatestByLot(parsed);
+
     return data.map(lot => {
       const spots = parseAvailability(lot.availability);
       const occupiedSpots = Object.values(spots).filter(occupied => occupied).length;
