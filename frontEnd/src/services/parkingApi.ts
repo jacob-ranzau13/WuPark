@@ -12,18 +12,44 @@ const ensureApiBaseUrl = () => {
   return API_BASE_URL;
 };
 
-const parseAvailability = (availabilityString: string): Record<string, boolean> => {
+const parseAvailability = (availabilityRaw: any): Record<string, boolean> => {
   try {
-    const parsed: DynamoDBAvailability = JSON.parse(availabilityString);
-    const spots: Record<string, boolean> = {};
-    
-    for (const [spotId, spotData] of Object.entries(parsed)) {
-      spots[spotId] = spotData.M.occupied.BOOL;
+    let parsed: any = availabilityRaw;
+
+    // If the API returned a JSON string, parse it
+    if (typeof availabilityRaw === 'string') {
+      parsed = JSON.parse(availabilityRaw);
     }
-    
+
+    const spots: Record<string, boolean> = {};
+
+    for (const [spotId, spotData] of Object.entries(parsed)) {
+      // handle DynamoDB wire format: { M: { occupied: { BOOL: true }}}
+      if (spotData && typeof spotData === 'object' && spotData.M && spotData.M.occupied && typeof spotData.M.occupied.BOOL === 'boolean') {
+        spots[spotId] = spotData.M.occupied.BOOL;
+        continue;
+      }
+
+      // handle simpler format: { occupied: true }
+      if (spotData && typeof spotData === 'object' && typeof (spotData as any).occupied === 'boolean') {
+        spots[spotId] = (spotData as any).occupied;
+        continue;
+      }
+
+      // handle direct boolean value
+      if (typeof spotData === 'boolean') {
+        spots[spotId] = spotData as boolean;
+        continue;
+      }
+
+      // unknown shape - default to false and log
+      logger.error('Unknown spot data shape', { spotId, spotData });
+      spots[spotId] = false;
+    }
+
     return spots;
   } catch (error) {
-    logger.error('Failed to parse availability data', { error, availabilityString });
+    logger.error('Failed to parse availability data', { error, availabilityRaw });
     throw new Error('Invalid availability data format');
   }
 };
