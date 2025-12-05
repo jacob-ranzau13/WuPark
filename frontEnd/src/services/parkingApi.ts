@@ -27,7 +27,7 @@ export const fetchParkingLotData = async (lotNum: number): Promise<ParsedParking
   try {
     logger.info('Fetching parking lot data', { lotNum });
     
-    const response = await fetch(`${API_BASE_URL}/parking/availability/${lotNum}`);
+    const response = await fetch(`${API_BASE_URL}/${lotNum}`);
     
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
@@ -65,7 +65,7 @@ export const fetchAllParkingLots = async (): Promise<ParsedParkingLotData[]> => 
   try {
     logger.info('Fetching all parking lots');
     
-    const response = await fetch(`${API_BASE_URL}/parking/availability`);
+    const response = await fetch(API_BASE_URL);
     
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
