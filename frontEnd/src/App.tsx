@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Container, AppBar, Toolbar, Typography, Box, Tabs, Tab } from '@mui/material';
 import { LocalParking } from '@mui/icons-material';
 import ParkingMap from './components/ParkingMap';
-import ParkingLotVisualizer from './components/ParkingLotVisualizer';
 import DemoDisplay, { Stall } from './components/DemoDisplay';
 import LotDemo from './assets/LotDemo.png';
 import { logger } from './utils/logger';
@@ -27,13 +26,36 @@ const App: React.FC = () => {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
+
+  const mapLotsToStalls = (): Stall[] => {
+    if (!parkingLots || parkingLots.length === 0) return [];
+    
+    const firstLot = parkingLots[0];
+    const stallPositions = [
+      { x: 12, y: 18 },
+      { x: 24, y: 18 },
+      { x: 36, y: 18 },
+      { x: 48, y: 18 },
+      { x: 60, y: 18 },
+      { x: 72, y: 18 },
+      { x: 84, y: 18 },
+      { x: 92, y: 18 },
+    ];
+
+    return firstLot.spots.slice(0, 8).map((spot, index) => ({
+      id: index + 1,
+      x: stallPositions[index].x,
+      y: stallPositions[index].y,
+      status: spot.isOccupied ? 'occupied' : 'free'
+    }));
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
           <Box component="img" src={WuParkLogo} alt="WuPark Logo" sx={{ height: 50, mr: 2 }} /> 
           <LocalParking sx={{ mr: 2 }} />
-          {/* Remove the title text but keep layout and the informational introduced by the pull */}
           <Box sx={{ flexGrow: 1 }} />
           <Typography variant="body2" component="div" sx={{ mr: 2, color: '#000000' }}>
             This application is incomplete and is for demonstration purposes only.
@@ -49,28 +71,11 @@ const App: React.FC = () => {
         {tab === 0 ? (
           <ParkingMap lots={parkingLots || []} />
         ) : (
-          // DemoDisplay expects coordinates as percentages (0-100). Replace the stalls below with coordinates you provide.
           <DemoDisplay
             imageSrc={LotDemo}
-            stalls={(
-              // Example placeholder: eight stalls with arbitrary percentage coordinates and unknown status.
-              [
-                { id: 1, x: 12, y: 18, status: 'unknown' } as Stall,
-                { id: 2, x: 24, y: 18, status: 'unknown' } as Stall,
-                { id: 3, x: 36, y: 18, status: 'unknown' } as Stall,
-                { id: 4, x: 48, y: 18, status: 'unknown' } as Stall,
-                { id: 5, x: 60, y: 18, status: 'unknown' } as Stall,
-                { id: 6, x: 72, y: 18, status: 'unknown' } as Stall,
-                { id: 7, x: 84, y: 18, status: 'unknown' } as Stall,
-                { id: 8, x: 92, y: 18, status: 'unknown' } as Stall,
-              ]
-            )}
+            stalls={mapLotsToStalls()}
           />
         )}
-
-      </Container>
-      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-        <ParkingLotVisualizer lotId={1} />
       </Container>
     </Box>
   );
