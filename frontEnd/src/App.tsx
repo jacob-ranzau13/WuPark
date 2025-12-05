@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Container, AppBar, Toolbar, Typography, Box, Tabs, Tab } from '@mui/material';
 import { LocalParking } from '@mui/icons-material';
 import ParkingMap from './components/ParkingMap';
@@ -27,9 +27,9 @@ const App: React.FC = () => {
     setTab(newValue);
   };
 
-  const mapLotsToStalls = (): Stall[] => {
+  const stalls = useMemo((): Stall[] => {
     const firstLot = parkingLots && parkingLots.length > 0 ? parkingLots[0] : undefined;
-    // pixel coordinates provided by user for LotDemo image (xPx, yPx)
+    
     const stallPositions = [
       { xPx: 241, yPx: 101 },
       { xPx: 241, yPx: 141 },
@@ -41,10 +41,8 @@ const App: React.FC = () => {
       { xPx: 470, yPx: 221 },
     ];
 
-    // If the API returns spots keyed by ids (A1..A8) we should map by those keys so order is stable.
     const spotKeys = ['A1','A2','A3','A4','A5','A6','A7','A8'];
 
-    // build lookup from the ParkingSpot[] (id:string) to occupancy if available
     const spotMap: Record<string, boolean | undefined> = {};
     if (firstLot && firstLot.spots) {
       for (const s of firstLot.spots) {
@@ -52,7 +50,7 @@ const App: React.FC = () => {
       }
     }
 
-    return spotKeys.map((key, index) => {
+    const result = spotKeys.map((key, index) => {
       const occ = spotMap[key];
       const status: any = occ === undefined ? 'unknown' : (occ ? 'occupied' : 'free');
       return {
@@ -63,7 +61,10 @@ const App: React.FC = () => {
         status,
       };
     });
-  };
+
+    logger.info('Stalls updated', { spotMap, result });
+    return result;
+  }, [parkingLots]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -87,14 +88,13 @@ const App: React.FC = () => {
           <ParkingMap lots={parkingLots || []} />
         ) : (
           (() => {
-            const stalls = mapLotsToStalls();
             const firstLot = parkingLots && parkingLots.length > 0 ? parkingLots[0] : undefined;
             if (!firstLot || stalls.length === 0) {
               return <Typography variant="body2">Parking data not available.</Typography>;
             }
 
             const total = firstLot.totalSpots ?? stalls.length;
-            const available = (firstLot.totalSpots ?? stalls.length) - (firstLot.occupiedSpots ?? (stalls.filter(s => s.status === 'occupied').length));
+            const available = (firstLot.totalSpots ?? stalls.length) - (firstLot.occupiedSpots ?? (stalls.filter((s: Stall) => s.status === 'occupied').length));
 
             return (
               <DemoDisplay
