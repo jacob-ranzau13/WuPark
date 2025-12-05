@@ -34,12 +34,23 @@ export const fetchParkingLotData = async (lotNum: number): Promise<ParsedParking
     
   const base = ensureApiBaseUrl();
   const response = await fetch(`${base}/${lotNum}`);
-    
+
+    // read raw response text for debugging and logging
+    const rawText = await response.text();
+    logger.info('Raw API response', { url: `${base}/${lotNum}`, status: response.status, rawText });
+
     if (!response.ok) {
+      logger.error('API request failed', { url: `${base}/${lotNum}`, status: response.status, rawText });
       throw new Error(`API request failed with status ${response.status}`);
     }
-    
-    const data: ApiParkingLotResponse = await response.json();
+
+    let data: ApiParkingLotResponse;
+    try {
+      data = JSON.parse(rawText) as ApiParkingLotResponse;
+    } catch (err) {
+      logger.error('Failed to parse JSON from API response', { url: `${base}/${lotNum}`, rawText, error: err });
+      throw new Error('Invalid JSON received from API');
+    }
     
     const spots = parseAvailability(data.availability);
     const occupiedSpots = Object.values(spots).filter(occupied => occupied).length;
@@ -73,12 +84,23 @@ export const fetchAllParkingLots = async (): Promise<ParsedParkingLotData[]> => 
     
   const base = ensureApiBaseUrl();
   const response = await fetch(base);
-    
+
+    // read raw response text for debugging and logging
+    const rawText = await response.text();
+    logger.info('Raw API response', { url: base, status: response.status, rawText });
+
     if (!response.ok) {
+      logger.error('API request failed', { url: base, status: response.status, rawText });
       throw new Error(`API request failed with status ${response.status}`);
     }
-    
-    const data: ApiParkingLotResponse[] = await response.json();
+
+    let data: ApiParkingLotResponse[];
+    try {
+      data = JSON.parse(rawText) as ApiParkingLotResponse[];
+    } catch (err) {
+      logger.error('Failed to parse JSON from API response', { url: base, rawText, error: err });
+      throw new Error('Invalid JSON received from API');
+    }
     
     return data.map(lot => {
       const spots = parseAvailability(lot.availability);
