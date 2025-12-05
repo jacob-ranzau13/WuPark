@@ -28,14 +28,7 @@ const createParkingIcon = (occupancyRate: number) => {
         border-radius: 50%;
         border: 3px solid white;
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 12px;
       ">
-        P
       </div>
     `,
     className: 'custom-parking-icon',
