@@ -1,23 +1,64 @@
-# WuPark
-Senior Design Project 
+Senior Design Project – Hardware & Setup Guide
 
-## Send/Receive Datatype
-The data sent/received will be in the following format:
+Hardware Components 
 
-Byte 1: To be interpreted as an integer, will tell the backend how many further bytes to read (minimum of one)
+1. Rasberry Pi
+   We use a Raspberry Pi to run our system and send camera data to the main computer.
 
-Byte 2: To be interpreted as an integer, will hold the lot number
+   Why we need it:
+    1. Low-cost processing unit.
+    2. Captures and processes image data locally 
+    3. Publishes data to the local machine via MQTT
+    4. Enables real-time system deployment without need a desktop computer.
 
-Bytes 3-n: each bit of trailing bytes will represent the status of a parking spot - 1 means taken, 0 means empty
+2. Camera Attachment
+   We use the Rasberry Pi Camera Module
 
-### Example: Three bytes
+   Why we need it:
+    1. Captures live images.
+    2. Enables real-time visula data collection.
+    3. Provides image streams that are processed and transmitted via MQTT.
 
-00000010 00000101 10100011
+SoftWare Installation & Setup
 
-The preceding sequence tells us the following: 
+Step 1 - Prepare the Raspberry Pi
+    1. Install Raspberry Pi OS using Pi Imager.
+    2. Boot the device and ensure:
+       1. Camera interface is enabled:
+          1. sudo raspi-config
+       2. Navigate:
+          1. Interface Options -> Camera -> Enable
+    3. Update the system:
+       1. sudo apt update 
 
-1. Byte 1, the leftmost byte, has a value of 2, telling us to expect 2 further bytes
-1. Byte 2 has a value of 5 - we're receiving this message from Lot 5
-1. Byte 3's bits tell us that there are four taken spots and four empty spots
+Step 2 - Install Python Packages
 
-Future implementations may include a signing or checksum to verify data integrity
+MQTT Communication Library
+
+We use paho-mqtt for message communication between: 
+    1. Raspberry Pi
+    2. Local machine
+ 1. Both devices must install this package:
+    1. pip install paho-mqtt
+   Reference: https://pypi.org/project/paho-mqtt/
+
+ Camera Library (Raspberry Pi Only)
+
+ The Raspberry Pi requires picamera2 to interface woth the camera module.
+
+ Install on Raspberry Pi:
+    1. pip install picamera2
+   Reference: https://pypi.org/project/picamera2/0.2.2/
+
+System Overview
+   1. Raspberry Pi:
+      1. Captures image data using picamera2
+      2. Processes data as needed.
+      3. Publishes data via MQTT using paho-mqtt.
+   2.  Local Machine:
+       1.  Subscribes to MQTT topics.
+       2.  Receives image or data messages. 
+       3.  Performs addtional processing, visualization, or analysis.  
+
+
+
