@@ -5,6 +5,7 @@ import { LocationOn } from '@mui/icons-material';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ParkingLot } from '../types';
+import { useParkingLots } from '../hooks/useParkingData';
 
 // Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;

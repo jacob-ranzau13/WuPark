@@ -5,9 +5,7 @@ export type StallStatus = 'free' | 'occupied' | 'unknown';
 
 export interface Stall {
   id: number;
-  // optional label from backend (e.g. "A1")
   label?: string;
-  // coordinates are percentages (0-100) relative to the image dimensions
   x?: number;
   y?: number;
   // optional pixel coordinates relative to the image's natural size
@@ -28,16 +26,15 @@ interface DemoDisplayProps {
 const statusColor = (s?: StallStatus) => {
   switch (s) {
     case 'free':
-      return '#00C853'; // green
+      return '#00C853';
     case 'occupied':
-      return '#D50000'; // red
+      return '#D50000';
     default:
-      return '#9E9E9E'; // gray
+      return '#9E9E9E';
   }
 };
 
 const DemoDisplay: React.FC<DemoDisplayProps> = ({ imageSrc, stalls, lotNum, lastUpdated, total: propTotal, available: propAvailable }) => {
-  // Prefer explicit totals passed in from App (derived from API). Fallback to computing from stalls.
   const total = typeof propTotal === 'number' ? propTotal : stalls.length;
   const available = typeof propAvailable === 'number' ? propAvailable : stalls.filter(s => s.status === 'free').length;
 
@@ -61,7 +58,6 @@ const DemoDisplay: React.FC<DemoDisplayProps> = ({ imageSrc, stalls, lotNum, las
 
   return (
     <Box>
-      {/* Summary boxes above the image */}
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 2 }}>
         <Box sx={{ backgroundColor: '#f5f5f5', px: 2, py: 1, borderRadius: 1, minWidth: 140, textAlign: 'center' }}>
           <Typography variant="caption" color="textSecondary">Total stalls</Typography>
@@ -74,7 +70,6 @@ const DemoDisplay: React.FC<DemoDisplayProps> = ({ imageSrc, stalls, lotNum, las
         </Box>
       </Box>
 
-      {/* show lot metadata if provided */}
       {lotNum && lastUpdated ? (
         <Box sx={{ textAlign: 'center', mb: 1 }}>
           <Typography variant="caption">Lot {lotNum} • Last updated: {new Date(lastUpdated).toLocaleString()}</Typography>
@@ -91,7 +86,6 @@ const DemoDisplay: React.FC<DemoDisplayProps> = ({ imageSrc, stalls, lotNum, las
           onLoad={onImageLoad}
         />
 
-        {/* overlay dots */}
         {stalls.map((s) => {
           const pos = computed[s.id];
           const left = pos ? `${pos.x}%` : (typeof s.x === 'number' ? `${s.x}%` : '0%');
