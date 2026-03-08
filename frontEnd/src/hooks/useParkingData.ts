@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from 'react-query';
 import { ParkingLot, ParkingSpot, ParsedParkingLotData } from '../types';
-import { fetchParkingLotData, fetchAllParkingLots } from '../services/parkingApi';
+import { fetchParkingLotData } from '../services/parkingApi';
 import { logger } from '../utils/logger';
 
 const POLLING_INTERVAL = 10000; // poll every 10 seconds
@@ -29,23 +29,6 @@ const convertToParkingLot = (data: ParsedParkingLotData, index: number): Parking
   };
 };
 
-export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
-  return useQuery(
-    'parkingLots',
-    async () => {
-      const data = await fetchAllParkingLots();
-      return data.map((lot, index) => convertToParkingLot(lot, index));
-    },
-    {
-      refetchInterval: POLLING_INTERVAL,
-      staleTime: 5000,
-      onError: (error) => {
-        logger.error('Failed to fetch parking lots', { error });
-      }
-    }
-  );
-};
-
 export const useParkingLot = (lotId: number): UseQueryResult<ParkingLot, Error> => {
   return useQuery(
     ['parkingLot', lotId],
@@ -58,6 +41,26 @@ export const useParkingLot = (lotId: number): UseQueryResult<ParkingLot, Error> 
       refetchInterval: POLLING_INTERVAL,
       onError: (error) => {
         logger.error('Failed to fetch parking lot', { error, lotId });
+      }
+    }
+  );
+};
+
+export const useParkingLotsByIds = (lotIds: number[]): UseQueryResult<ParkingLot[], Error> => {
+  return useQuery(
+    ['parkingLotsByIds', lotIds],
+    async () => {
+      const results = await Promise.all(lotIds.map((id, index) =>
+        fetchParkingLotData(id).then((data) => convertToParkingLot(data, index))
+      ));
+      return results;
+    },
+    {
+      enabled: lotIds.length > 0,
+      refetchInterval: POLLING_INTERVAL,
+      staleTime: 5000,
+      onError: (error) => {
+        logger.error('Failed to fetch parking lots', { error, lotIds });
       }
     }
   );

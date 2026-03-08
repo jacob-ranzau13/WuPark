@@ -4,7 +4,7 @@ import ParkingMap from './components/ParkingMap';
 import DemoDisplay, { Stall } from './components/DemoDisplay';
 import LotDemo from './assets/LotDemo.png';
 import { logger } from './utils/logger';
-import { useParkingLots } from './hooks/useParkingData';
+import { useParkingLotsByIds } from './hooks/useParkingData';
 import WuParkLogo from './assets/WuPark Logo 2.jpg';
 
 const App: React.FC = () => {
@@ -19,7 +19,8 @@ const App: React.FC = () => {
       });
     };
   }, []);
-  const { data: parkingLots } = useParkingLots();
+  const lotIds = [1];
+  const { data: parkingLots } = useParkingLotsByIds(lotIds);
   const [tab, setTab] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
