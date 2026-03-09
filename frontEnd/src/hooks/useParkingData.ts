@@ -48,7 +48,3 @@ export const useParkingLotsByIds = (lotIds: number[]): UseQueryResult<ParkingLot
     }
   );
 };
-
-export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
-  return useParkingLotsByIds([1, 2, 3]);
-};

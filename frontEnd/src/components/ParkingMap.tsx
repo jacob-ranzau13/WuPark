@@ -5,7 +5,7 @@ import { LocationOn } from '@mui/icons-material';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ParkingLot } from '../types';
-import { useParkingLots } from '../hooks/useParkingData';
+import { useParkingLotsByIds } from '../hooks/useParkingData';
 
 // Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -42,9 +42,9 @@ interface ParkingMapProps {
 }
 
 const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
-  const center: [number, number] = [37.7191, -97.2917]; // Rochester, MN coordinates
+  const center: [number, number] = [37.7191, -97.2917];
   const zoom = 16;
-  const { data: parkingLots, isLoading, error } = useParkingLots();
+  const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1, 2, 3]);
 
   return (
     <Box sx={{ height: 'calc(100vh - 64px)', width: '100%', position: 'relative' }}>
