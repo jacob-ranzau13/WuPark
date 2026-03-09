@@ -44,7 +44,7 @@ interface ParkingMapProps {
 const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
   const center: [number, number] = [37.7191, -97.2917];
   const zoom = 16;
-  const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1, 2, 3]);
+  const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1]);
 
   return (
     <Box sx={{ height: 'calc(100vh - 64px)', width: '100%', position: 'relative' }}>
