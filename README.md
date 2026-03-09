@@ -1,149 +1,77 @@
-# WuPark
-**Smart Parking Management System - Senior Design Project**
+Senior Design Project – Hardware & Setup Guide
 
-A comprehensive parking management solution with real-time monitoring, modern web interface, and AWS cloud deployment.
+**Hardware Components** 
 
-## 🏗️ Architecture
+1. Rasberry Pi
+   We use a Raspberry Pi to run our system and send camera data to the main computer.
 
-- **Frontend**: Modern React application with Material-UI and OpenStreetMap integration
-- **Backend**: FastAPI with AWS Lambda (deployed separately in another repository)
-- **Infrastructure**: AWS S3, CloudFront, API Gateway, Lambda
-- **Deployment**: Serverless Framework with GitHub Actions CI/CD
+   Why we need it:
+    1. Low-cost processing unit.
+    2. Captures and processes image data locally 
+    3. Publishes data to the local machine via MQTT
+    4. Enables real-time system deployment without need a desktop computer.
 
-## 📁 Project Structure
+2. Camera Attachment
+   We use the Rasberry Pi Camera Module
 
-```
-WuPark/
-├── frontEnd/              # Modern React frontend application
-│   ├── src/
-│   │   ├── components/    # React components (Dashboard, Map, Cards)
-│   │   ├── services/      # API client and utilities
-│   │   ├── hooks/         # Custom React hooks
-│   │   └── types/         # TypeScript definitions
-│   ├── .github/workflows/ # CI/CD pipelines
-│   └── serverless.yml     # AWS deployment configuration
-├── backEnd/               # Backend dependencies (see separate repo for main code)
-├── send_receive/          # Data communication utilities
-├── LotImages/             # Parking lot images
-└── *.py                   # Legacy Python scripts
-```
+   Why we need it:
+    1. Captures live images.
+    2. Enables real-time visula data collection.
+    3. Provides image streams that are processed and transmitted via MQTT.
 
-## 🚀 Quick Start
+**SoftWare Installation & Setup**
 
-### Frontend Development
+Step 1 - Prepare the Raspberry Pi
+ 1. Install Raspberry Pi OS using Pi Imager.
+ 2. Boot the device and ensure:
+  1. Camera interface is enabled:
+   1. sudo raspi-config
+   2. Navigate:
+    1. Interface Options -> Camera -> Enable
+ 3. Update the system:
+  1. sudo apt update 
 
-1. **Navigate to frontend directory**:
-   ```bash
-   cd frontEnd
-   ```
+Step 2 - Install Python Packages
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+**MQTT Communication Library**
+We use paho-mqtt for message communication between: 
+ 1. Raspberry Pi
+ 2. Local machine
+ 
+ 1. Both devices must install this package:
+  1. pip install paho-mqtt
+  Reference: https://pypi.org/project/paho-mqtt/
 
-3. **Configure environment**:
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your API URL
-   ```
+ Camera Library (Raspberry Pi Only)
+ The Raspberry Pi requires picamera2 to interface woth the camera module.
+ 
+ Install on Raspberry Pi:
+  1. pip install picamera2
+  Reference: https://pypi.org/project/picamera2/0.2.2/
 
-4. **Start development server**:
-   ```bash
-   npm start
-   ```
+ **Image Processing Module**
+ 
+ Why we need it:
+  1. Image processing allows the system to detect vehicles and determie whether parking              spaces are ocuppied or available. 
+  2. Without this, the system would not be able to analyze camera images.
 
-### Deployment
+  Tech used:
+   1. Roboflow - used to train and host the vehicle detection model
+   2. Roboflow Inference SDK/API - used to send images to the trained model and receive               detection results.
 
-#### Using PowerShell (Windows):
-```powershell
-cd frontEnd
-.\deploy.ps1 -Stage staging
-```
+  How it works:   
+   1. The camera captures an image of the lot.
+   2. The image is sent to the Roboflow model.
+   3. The model detects vehicles and returns bounding boxes.
+   4. If there is a car on the spot, the stall is marked as "red" (occupied)
+   5. If there is no car on the spot, the stall is marked as "green" (available).
 
-#### Using Bash (Linux/macOS):
-```bash
-cd frontEnd
-chmod +x deploy.sh
-./deploy.sh --stage staging
-```
-
-## 📡 Data Protocol
-
-The system communicates using a binary protocol for efficient data transmission:
-
-**Format**: `[Length][Lot ID][Spot Data...]`
-
-- **Byte 1**: Number of data bytes to follow (minimum 1)
-- **Byte 2**: Parking lot identifier  
-- **Bytes 3-n**: Bit-encoded parking spot status (1 = occupied, 0 = empty)
-
-### Example: Three bytes
-```
-00000010 00000101 10100011
-```
-
-**Interpretation**:
-1. **Byte 1** (2): Expect 2 more bytes
-2. **Byte 2** (5): Data from Parking Lot #5  
-3. **Byte 3** (163): 4 occupied spots, 4 empty spots
-
-## 🔧 Features
-
-### Frontend Features
-- 🎨 Modern Material-UI design system
-- 📱 Responsive mobile-friendly interface
-- 🗺️ Interactive OpenStreetMap integration
-- 📊 Real-time parking data visualization
-- ⚡ Live updates with React Query
-- 📈 Occupancy rate monitoring and analytics
-
-### Infrastructure Features
-- ☁️ Serverless AWS deployment
-- 🚀 Automated CI/CD with GitHub Actions
-- 🌐 CloudFront CDN for global delivery
-- 🔒 Secure API integration
-- 📊 CloudWatch monitoring and logging
-
-## 🛠️ Development
-
-### Prerequisites
-- Node.js 18+ and npm
-- AWS CLI configured
-- Git
-
-### Environment Variables
-```env
-REACT_APP_API_URL=https://your-api-gateway-url.amazonaws.com/prod
-REACT_APP_ENVIRONMENT=production
-```
-
-### GitHub Actions Secrets
-Configure these secrets in your repository:
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`  
-- `STAGING_API_URL`
-- `PROD_API_URL`
-
-## 📚 Documentation
-
-- [Frontend README](./frontEnd/README.md) - Detailed frontend documentation
-- [API Documentation](./API.md) - Backend API reference (if available)
-- [Deployment Guide](./DEPLOYMENT.md) - Comprehensive deployment instructions
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test thoroughly
-4. Commit: `git commit -am 'Add feature'`
-5. Push: `git push origin feature-name`  
-6. Submit a pull request
-
-## 📄 License
-
-This project is part of the WuPark Senior Design Project.
-
----
-
-**Future Enhancements**: Data integrity verification, WebSocket real-time updates, mobile app integration
+**System Overview**
+  1. Raspberry Pi:
+   1. Captures image data using picamera2
+   2. Processes data as needed.
+   3. Publishes data via MQTT using paho-mqtt.
+  2.  Local Machine:
+   1. Subscribes to MQTT topics.
+   2. Receives image or data messages. 
+   3. Performs addtional processing, visualization, or analysis.

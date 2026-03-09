@@ -13,7 +13,7 @@ export class ParkingApiService {
 
   static fromEnv(): ParkingApiService {
     const baseUrl = process.env.REACT_APP_API_URL;
-    const apiKey = process.env.AVAILABILITY_API_KEY;
+    const apiKey = process.env.REACT_APP_AVAILABILITY_API_KEY;
     if (!baseUrl) {
       const msg = 'REACT_APP_API_URL environment variable is not set.';
       logger.error(msg);
@@ -21,7 +21,7 @@ export class ParkingApiService {
     }
 
     if (!apiKey) {
-      const msg = 'REACT_APP_API_KEY environment variable is not set.';
+      const msg = 'REACT_APP_AVAILABILITY_API_KEY environment variable is not set.';
       logger.error(msg);
       throw new Error(msg);
     }
