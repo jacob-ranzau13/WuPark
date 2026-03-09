@@ -29,23 +29,6 @@ const convertToParkingLot = (data: ParsedParkingLotData, index: number): Parking
   };
 };
 
-export const useParkingLot = (lotId: number): UseQueryResult<ParkingLot, Error> => {
-  return useQuery(
-    ['parkingLot', lotId],
-    async () => {
-      const data = await fetchParkingLotData(lotId);
-      return convertToParkingLot(data, lotId - 1);
-    },
-    {
-      enabled: !!lotId,
-      refetchInterval: POLLING_INTERVAL,
-      onError: (error) => {
-        logger.error('Failed to fetch parking lot', { error, lotId });
-      }
-    }
-  );
-};
-
 export const useParkingLotsByIds = (lotIds: number[]): UseQueryResult<ParkingLot[], Error> => {
   return useQuery(
     ['parkingLotsByIds', lotIds],
@@ -68,45 +51,4 @@ export const useParkingLotsByIds = (lotIds: number[]): UseQueryResult<ParkingLot
 
 export const useParkingLots = (): UseQueryResult<ParkingLot[], Error> => {
   return useParkingLotsByIds([1, 2, 3]);
-};
-
-export const useParkingLotData = (lotId: number): UseQueryResult<ParsedParkingLotData, Error> => {
-  return useQuery(
-    ['parkingLotData', lotId],
-    async () => {
-      return await fetchParkingLotData(lotId);
-    },
-    {
-      enabled: !!lotId,
-      refetchInterval: POLLING_INTERVAL,
-      onError: (error) => {
-        logger.error('Failed to fetch parking lot data', { error, lotId });
-      }
-    }
-  );
-};
-
-export const useParkingSpots = (lotId: number): UseQueryResult<ParkingSpot[], Error> => {
-  const { data: lotData } = useParkingLotData(lotId);
-  
-  return useQuery(
-    ['parkingSpots', lotId],
-    () => {
-      if (!lotData) {
-        return Promise.reject(new Error('Lot data not available'));
-      }
-      
-      const spots: ParkingSpot[] = Object.entries(lotData.spots).map(([spotId, isOccupied]) => ({
-        id: spotId,
-        isOccupied,
-        lotId
-      }));
-      
-      return Promise.resolve(spots);
-    },
-    {
-      enabled: !!lotId && !!lotData,
-      refetchInterval: POLLING_INTERVAL,
-    }
-  );
 };
