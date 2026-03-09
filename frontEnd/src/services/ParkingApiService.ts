@@ -39,7 +39,7 @@ export class ParkingApiService {
     return toParsedLot(latest[0]);
   }
 
-  private async fetchJson(url: string): Promise<ApiParkingLotResponse[] | { data: ApiParkingLotResponse[] }> {
+  private async fetchJson(url: string): Promise<{ data: ApiParkingLotResponse }> {
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
