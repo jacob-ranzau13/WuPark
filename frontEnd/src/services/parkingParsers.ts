@@ -1,9 +1,12 @@
 import { ApiParkingLotResponse, ParsedParkingLotData } from '../types';
 
 export const normalizeApiResponse = (
-  data: ApiParkingLotResponse[] | { data: ApiParkingLotResponse[] }
+  data: { data: ApiParkingLotResponse } | ApiParkingLotResponse
 ): ApiParkingLotResponse[] => {
-  return Array.isArray(data) ? data : data.data;
+  if ('data' in data && 'lotNum' in data.data) {
+    return [data.data];
+  }
+  return [data as ApiParkingLotResponse];
 };
 
 export const pickLatestByLot = (items: ApiParkingLotResponse[]): ApiParkingLotResponse[] => {
@@ -14,7 +17,6 @@ export const pickLatestByLot = (items: ApiParkingLotResponse[]): ApiParkingLotRe
       latest[item.lotNum] = item;
     }
   }
-
   return Object.values(latest);
 };
 
@@ -22,11 +24,13 @@ export const parseAvailability = (availability: unknown): Record<string, boolean
   const parsed = typeof availability === 'string' ? JSON.parse(availability) : availability;
   const map = (parsed as any)?.M ? (parsed as any).M : parsed;
   const spots: Record<string, boolean> = {};
-
-  Object.entries(map as Record<string, boolean>).forEach(([spotId, isOccupied]) => {
-    spots[spotId] = Boolean(isOccupied);
+  Object.entries(map as Record<string, any>).forEach(([spotId, value]) => {
+    if (typeof value === 'object' && value !== null && 'occupied' in value) {
+      spots[spotId] = Boolean(value.occupied);
+    } else {
+      spots[spotId] = Boolean(value);
+    }
   });
-
   return spots;
 };
 

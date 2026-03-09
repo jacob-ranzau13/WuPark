@@ -25,13 +25,17 @@ export class ParkingApiService {
       logger.error(msg);
       throw new Error(msg);
     }
-
     return new ParkingApiService(baseUrl, apiKey);
   }
 
   async fetchParkingLotData(lotNum: number): Promise<ParsedParkingLotData> {
     const response = await this.fetchJson(`${this.baseUrl}/${lotNum}`);
-    const latest = pickLatestByLot(normalizeApiResponse(response));
+    logger.info('API response received', { lotNum, response });
+    const normalized = normalizeApiResponse(response);
+    if (!normalized || normalized.length === 0) {
+      throw new Error(`No parking data found for lot ${lotNum}`);
+    }
+    const latest = pickLatestByLot(normalized);
     return toParsedLot(latest[0]);
   }
 
@@ -42,11 +46,9 @@ export class ParkingApiService {
         'x-api-key': this.apiKey
       }
     });
-
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
-
     return response.json();
   }
 }
