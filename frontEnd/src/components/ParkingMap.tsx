@@ -42,8 +42,10 @@ interface ParkingMapProps {
 }
 
 const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
+  const isMobile = window.innerWidth < 600;
+  
   const center: [number, number] = [37.7191, -97.2917];
-  const zoom = 16;
+  const zoom = isMobile ? 13 : 16;
   const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1]);
 
   return (
