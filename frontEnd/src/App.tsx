@@ -122,7 +122,7 @@ const App: React.FC = () => {
           <Tab label="Demo Display" />
         </Tabs>
         <Box sx={{flexGrow: 1, minHeight: 0}}>
-          {tab === 0 ? <ParkingMap lots={parkingLots} /> : renderDemoDisplay()}
+          {tab === 0 ? <ParkingMap lots={parkingLots || []} /> : renderDemoDisplay()}
         </Box>
       </Container>
     </Box>
