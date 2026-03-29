@@ -77,22 +77,53 @@ const App: React.FC = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
       <AppBar position="static">
-        <Toolbar>
-          <Box component="img" src={WuParkLogo} alt="WuPark Logo" sx={{ height: 50, mr: 2 }} />
-          <Box sx={{ flexGrow: 1 }} />
-          <Typography variant="body2" sx={{ mr: 2, color: '#000000' }}>
+        <Toolbar sx={{minHeight: { xs: 60, sm: 70 }, px: { xs: 1, sm: 2 }}}>
+          <Box 
+            component="img" 
+            src={WuParkLogo} 
+            alt="WuPark Logo" 
+            sx={{height: { xs: 40, sm: 50 }, mr: { xs: 1, sm: 2 }}} 
+          />
+          <Box sx={{flexGrow: 1}} />
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              mr: 2, 
+              color: '#000000',
+              display: {xs: 'none', md: 'block'},
+              fontSize: {sm: '0.8rem', md: '0.9rem'}
+            }}
+          >
             This application is incomplete and is for demonstration purposes only.
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="main tabs" sx={{ mb: 2 }}>
+      <Container 
+        maxWidth="xl" 
+        sx={{ 
+          mt: {xs: 1, sm: 2, md: 4}, 
+          mb: {xs: 1, sm: 2, md: 4},
+          px: {xs: 1, sm: 2, md: 3},
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Tabs 
+          value={tab} 
+          onChange={(_, v) => setTab(v)} 
+          aria-label="main tabs" 
+          sx={{ mb: { xs: 1, sm: 2 } }}
+          variant="fullWidth"
+        >
           <Tab label="Map" />
           <Tab label="Demo Display" />
         </Tabs>
-        {tab === 0 ? <ParkingMap lots={parkingLots || []} /> : renderDemoDisplay()}
+        <Box sx={{flexGrow: 1, minHeight: 0}}>
+          {tab === 0 ? <ParkingMap lots={parkingLots} /> : renderDemoDisplay()}
+        </Box>
       </Container>
     </Box>
   );

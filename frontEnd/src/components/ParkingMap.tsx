@@ -47,12 +47,27 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
   const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1]);
 
   return (
-    <Box sx={{ height: 'calc(100vh - 64px)', width: '100%', position: 'relative' }}>
+    <Box
+      sx={{
+        height: {
+          xs: 'calc(100vh - 140px)',
+          sm: 'calc(100vh - 160px)',
+          md: 'calc(100vh - 180px)'
+        },
+        minHeight: { xs: 300, sm: 400 },
+        width: '100%',
+        position: 'relative',
+        borderRadius: 1,
+        overflow: 'hidden'
+      }}
+    >
       <MapContainer
         center={center}
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
+        tap={true}
+        dragging={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

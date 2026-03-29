@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './App';
+import './index.css';
 
 const theme = createTheme({
   palette: {
@@ -16,7 +17,6 @@ const theme = createTheme({
     },
   },
   typography: {
-    // Use system fonts to avoid external Google Fonts requests (fix CSP blocks)
     fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   },
 });
