@@ -66,8 +66,6 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
-        tap={true}
-        dragging={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
