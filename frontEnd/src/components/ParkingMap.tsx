@@ -23,17 +23,17 @@ const createParkingIcon = (occupancyRate: number) => {
     html: `
       <div style="
         background-color: ${color};
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       ">
       </div>
     `,
     className: 'custom-parking-icon',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
   });
 };
 
