@@ -1,11 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Box, Typography, Chip } from '@mui/material';
-import { LocationOn } from '@mui/icons-material';
+import { Box, Typography, Chip, Button } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ParkingLot } from '../types';
 import { useParkingLotsByIds } from '../hooks/useParkingData';
+import { mergeWithMockData } from '../utils/mockParkingData';
 
 // Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -42,11 +43,14 @@ interface ParkingMapProps {
 }
 
 const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
+  const navigate = useNavigate();
   const isMobile = window.innerWidth < 600;
   
   const center: [number, number] = [37.7191, -97.2917];
   const zoom = isMobile ? 14 : 16;
-  const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1]);
+  const { data: parkingLots, isLoading, error } = useParkingLotsByIds([1, 2]);
+
+  const displayLots = mergeWithMockData(lots);
 
   return (
     <Box
@@ -73,7 +77,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {lots.map((lot) => {
+        {displayLots.map((lot) => {
           const occupancyRate = lot.totalSpots > 0 
             ? (lot.occupiedSpots / lot.totalSpots) * 100 
             : 0;
@@ -86,45 +90,44 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
               icon={createParkingIcon(occupancyRate)}
             >
               <Popup>
-                <Box sx={{ minWidth: 200 }}>
+                <Box sx={{ minWidth: 200, textAlign: 'center' }}>
                   <Typography variant="h6" gutterBottom>
                     {lot.name}
                   </Typography>
                   
-                  <Box display="flex" alignItems="center" mb={1}>
-                    <LocationOn fontSize="small" color="action" sx={{ mr: 0.5 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {lot.location.lat.toFixed(4)}, {lot.location.lng.toFixed(4)}
-                    </Typography>
-                  </Box>
-                  
-                  <Box mb={2}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                     <Chip
                       label={`${occupancyRate.toFixed(1)}% occupied`}
-                      color={occupancyRate < 50 ? 'success' : occupancyRate < 80 ? 'warning' : 'error'}
-                      size="small"
+                      color={occupancyRate < 80 ? 'success' : occupancyRate < 100 ? 'warning' : 'error'}
+                      size="medium"
+                      sx={{ fontSize: '1rem', padding: '20px 8px' }}
                     />
                   </Box>
                   
-                  <Box display="flex" justifyContent="space-between">
+                  <Box display="flex" justifyContent="center" gap={3} mb={2}>
                     <Box textAlign="center">
-                      <Typography variant="h6" color="success.main">
+                      <Typography variant="h4" color="success.main">
                         {availableSpots}
                       </Typography>
-                      <Typography variant="caption">Available</Typography>
+                      <Typography variant="body2">Available</Typography>
                     </Box>
                     <Box textAlign="center">
-                      <Typography variant="h6" color="error.main">
+                      <Typography variant="h4" color="error.main">
                         {lot.occupiedSpots}
                       </Typography>
-                      <Typography variant="caption">Occupied</Typography>
+                      <Typography variant="body2">Occupied</Typography>
                     </Box>
-                    <Box textAlign="center">
-                      <Typography variant="h6">
-                        {lot.totalSpots}
-                      </Typography>
-                      <Typography variant="caption">Total</Typography>
-                    </Box>
+                  </Box>
+                  
+                  <Box textAlign="center" sx={{ mt: 2 }}>
+                    <Button 
+                      variant="contained" 
+                      color="primary"
+                      sx={{ mt: 1 }}
+                      onClick={() => lot.id === 1 ? navigate('/lot/1') : navigate('/lot2')}
+                    >
+                      View Details
+                    </Button>
                   </Box>
                   
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
