@@ -17,14 +17,14 @@ L.Icon.Default.mergeOptions({
 
 // Create a custom icon for parking markers
 const createParkingIcon = (occupancyRate: number) => {
-  const color = occupancyRate < 50 ? '#4caf50' : occupancyRate < 80 ? '#ff9800' : '#f44336';
+  const color = occupancyRate < 80 ? '#4caf50' : occupancyRate < 100 ? '#ff9800' : '#f44336';
   
   return L.divIcon({
     html: `
       <div style="
         background-color: ${color};
-        width: 20px;
-        height: 20px;
+        width: 25px;
+        height: 25px;
         border-radius: 50%;
         border: 2px solid white;
         box-shadow: 0 1px 3px rgba(0,0,0,0.3);
@@ -32,8 +32,8 @@ const createParkingIcon = (occupancyRate: number) => {
       </div>
     `,
     className: 'custom-parking-icon',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [25, 25],
+    iconAnchor: [12, 12],
   });
 };
 
