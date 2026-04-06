@@ -47,7 +47,7 @@ const App: React.FC = () => {
   useErrorHandler();
 
   const [tab, setTab] = useState(0);
-  const { data: parkingLots } = useParkingLotsByIds([1]);
+  const { data: parkingLots } = useParkingLotsByIds([1, 2]);
   const firstLot = parkingLots?.[0];
 
   const stalls = useMemo(() => {

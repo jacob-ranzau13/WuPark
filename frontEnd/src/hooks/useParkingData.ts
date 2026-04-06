@@ -13,9 +13,8 @@ const convertToParkingLot = (data: ParsedParkingLotData, index: number): Parking
   }));
 
   const mockLocations = [
-    { lat: 37.7191, lng: -97.2985 },
-    { lat: 37.722, lng: -97.2905 },
-    { lat: 37.7165, lng: -97.2856 }
+    { lat: 37.716030356563614, lng: -97.29224684614849 },
+    { lat: 37.716030356563614, lng: -97.29349943770109 }
   ];
 
   return {
