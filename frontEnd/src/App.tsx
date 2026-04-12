@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container, AppBar, Toolbar, Typography, Box } from '@mui/material';
 import ParkingMap from './components/ParkingMap';
 import { logger } from './utils/logger';
-import { useParkingLotsByIds } from './hooks/useParkingData';
+import { useParkingLotsByIds, ALL_LOT_IDS } from './hooks/useParkingData';
 import WuParkLogo from './assets/WuPark Logo 2.jpg';
 import Lot1DetailPage from './pages/Lot1DetailPage';
 import Lot2DetailPage from './pages/Lot2DetailPage';
@@ -21,7 +21,7 @@ const useErrorHandler = () => {
 const App: React.FC = () => {
   useErrorHandler();
 
-  const { data: parkingLots } = useParkingLotsByIds([1, 2]);
+  const { data: parkingLots } = useParkingLotsByIds(ALL_LOT_IDS);
 
   return (
     <Router>
