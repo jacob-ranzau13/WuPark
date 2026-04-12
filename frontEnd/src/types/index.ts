@@ -7,10 +7,6 @@ export interface ParkingSpot {
 export interface ParkingLot {
   id: number;
   name: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
   spots: ParkingSpot[];
   totalSpots: number;
   occupiedSpots: number;
