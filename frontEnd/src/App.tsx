@@ -7,6 +7,7 @@ import { useParkingLotsByIds, ALL_LOT_IDS } from './hooks/useParkingData';
 import WuParkLogo from './assets/WuPark Logo 2.jpg';
 import Lot1DetailPage from './pages/Lot1DetailPage';
 import Lot2DetailPage from './pages/Lot2DetailPage';
+import NoDataPage from './pages/NoDataPage';
 
 const useErrorHandler = () => {
   useEffect(() => {
@@ -26,8 +27,13 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/lot/:lotId" element={<Lot1DetailPage />} />
-        <Route path="/lot2" element={<Lot2DetailPage />} />
+        {/* Lots with data */}
+        <Route path="/lot/1" element={<Lot1DetailPage />} />
+        <Route path="/lot/2" element={<Lot2DetailPage />} />
+        
+        {/* Lots without data */}
+        <Route path="/lot/:lotId" element={<NoDataPage />} />
+        
         <Route 
           path="/" 
           element={

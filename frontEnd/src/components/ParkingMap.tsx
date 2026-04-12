@@ -17,8 +17,11 @@ L.Icon.Default.mergeOptions({
 });
 
 // Create a custom icon for parking markers
-const createParkingIcon = (occupancyRate: number) => {
-  const color = occupancyRate < 80 ? '#4caf50' : occupancyRate < 100 ? '#ff9800' : '#f44336';
+const createParkingIcon = (occupancyRate: number, hasData: boolean) => {
+  let color = '#9E9E9E'; 
+  if (hasData) {
+    color = occupancyRate < 80 ? '#4caf50' : occupancyRate < 100 ? '#ff9800' : '#f44336';
+  }
   
   return L.divIcon({
     html: `
@@ -78,7 +81,8 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {displayLots.map((lot) => {
-          const occupancyRate = lot.totalSpots > 0 
+          const hasData = lot.totalSpots > 0;
+          const occupancyRate = hasData 
             ? (lot.occupiedSpots / lot.totalSpots) * 100 
             : 0;
           const availableSpots = lot.totalSpots - lot.occupiedSpots;
@@ -87,7 +91,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
             <Marker
               key={lot.id}
               position={[lot.location.lat, lot.location.lng]}
-              icon={createParkingIcon(occupancyRate)}
+              icon={createParkingIcon(occupancyRate, hasData)}
             >
               <Popup>
                 <Box sx={{ minWidth: 200, textAlign: 'center' }}>
@@ -124,7 +128,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
                       variant="contained" 
                       color="primary"
                       sx={{ mt: 1 }}
-                      onClick={() => lot.id === 1 ? navigate('/lot/1') : navigate('/lot2')}
+                      onClick={() => navigate(`/lot/${lot.id}`)}
                     >
                       View Details
                     </Button>
