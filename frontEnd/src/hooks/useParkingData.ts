@@ -27,6 +27,7 @@ const convertToParkingLot = (data: ParsedParkingLotData): ParkingLot => {
     id: data.lotNum,
     name: lotInfo?.name || `Parking Lot ${data.lotNum}`,
     spots,
+    location: lotInfo ? { lat: lotInfo.lat, lng: lotInfo.lng } : { lat: 0, lng: 0 },
     totalSpots: data.totalSpots,
     occupiedSpots: data.occupiedSpots,
     lastUpdated: new Date(data.timestamp * 1000)
@@ -38,6 +39,7 @@ const createPlaceholderLot = (lotId: number): ParkingLot => {
   return {
     id: lotId,
     name: lotInfo?.name || `Parking Lot ${lotId}`,
+    location: lotInfo ? { lat: lotInfo.lat, lng: lotInfo.lng } : { lat: 0, lng: 0 },
     spots: [],
     totalSpots: 0,
     occupiedSpots: 0,
