@@ -18,7 +18,7 @@ L.Icon.Default.mergeOptions({
 
 // Create a custom icon for parking markers
 const createParkingIcon = (occupancyRate: number, hasData: boolean) => {
-  let color = '#9E9E9E'; 
+  let color = '#00E5FF'; 
   if (hasData) {
     color = occupancyRate < 80 ? '#4caf50' : occupancyRate < 100 ? '#ff9800' : '#f44336';
   }
