@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Box, Typography, Chip, Button } from '@mui/material';
+// @ts-ignore
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ParkingLot } from '../types';
@@ -18,15 +19,18 @@ L.Icon.Default.mergeOptions({
 
 // Create a custom icon for parking markers
 const createParkingIcon = (occupancyRate: number, hasData: boolean) => {
-  let color = '#0BA6F4'; 
+  let backgroundStyle = '';
   if (hasData) {
-    color = occupancyRate < 80 ? '#4caf50' : occupancyRate < 100 ? '#ff9800' : '#f44336';
+    const color = occupancyRate < 80 ? '#4caf50' : occupancyRate < 100 ? '#ff9800' : '#f44336';
+    backgroundStyle = `background-color: ${color};`;
+  } else {
+    backgroundStyle = `background: repeating-linear-gradient(45deg, #808080 0px, #808080 5px, #FFFF00 5px, #FFFF00 10px);`;
   }
   
   return L.divIcon({
     html: `
       <div style="
-        background-color: ${color};
+        ${backgroundStyle}
         width: 25px;
         height: 25px;
         border-radius: 50%;
@@ -108,20 +112,28 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
                     />
                   </Box>
                   
-                  <Box display="flex" justifyContent="center" gap={3} mb={2}>
-                    <Box textAlign="center">
-                      <Typography variant="h4" color="success.main">
-                        {availableSpots}
-                      </Typography>
-                      <Typography variant="body2">Available</Typography>
+                  {hasData ? (
+                    <Box display="flex" justifyContent="center" gap={3} mb={2}>
+                      <Box textAlign="center">
+                        <Typography variant="h4" color="success.main">
+                          {availableSpots}
+                        </Typography>
+                        <Typography variant="body2">Available</Typography>
+                      </Box>
+                      <Box textAlign="center">
+                        <Typography variant="h4" color="error.main">
+                          {lot.occupiedSpots}
+                        </Typography>
+                        <Typography variant="body2">Occupied</Typography>
+                      </Box>
                     </Box>
-                    <Box textAlign="center">
-                      <Typography variant="h4" color="error.main">
-                        {lot.occupiedSpots}
+                  ) : (
+                    <Box textAlign="center" mb={2}>
+                      <Typography variant="body1" color="text.secondary">
+                        No data available
                       </Typography>
-                      <Typography variant="body2">Occupied</Typography>
                     </Box>
-                  </Box>
+                  )}
                   
                   <Box textAlign="center" sx={{ mt: 2 }}>
                     <Button 
