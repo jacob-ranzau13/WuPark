@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, AppBar, Toolbar, Typography, Box } from '@mui/material';
+import { Container, AppBar, Toolbar, Typography, Box, IconButton } from '@mui/material';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { useThemeMode } from './context/ThemeContext';
 import ParkingMap from './components/ParkingMap';
 import { logger } from './utils/logger';
 import { useParkingLotsByIds, ALL_LOT_IDS } from './hooks/useParkingData';
@@ -21,6 +24,7 @@ const useErrorHandler = () => {
 
 const App: React.FC = () => {
   useErrorHandler();
+  const { isDarkMode, toggleTheme } = useThemeMode();
 
   const { data: parkingLots } = useParkingLotsByIds(ALL_LOT_IDS);
 
@@ -47,6 +51,9 @@ const App: React.FC = () => {
                     sx={{height: { xs: 40, sm: 50 }, mr: { xs: 1, sm: 2 }}} 
                   />
                   <Box sx={{flexGrow: 1}} />
+                  <IconButton onClick={toggleTheme} sx={{ color: '#000000', mr: 1 }}>
+                    {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                  </IconButton>
                   <Typography 
                     variant="body2" 
                     sx={{ 

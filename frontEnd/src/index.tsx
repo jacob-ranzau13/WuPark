@@ -1,25 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeContextProvider } from './context/ThemeContext';
 import App from './App';
 import './index.css';
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#f1c232',
-    },
-    secondary: {
-      main: '#ffffffff',
-    },
-  },
-  typography: {
-    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  },
-});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,10 +20,9 @@ const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
+      <ThemeContextProvider>
         <App />
-      </ThemeProvider>
+      </ThemeContextProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );
