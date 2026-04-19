@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, AppBar, Toolbar, Typography, Box, IconButton } from '@mui/material';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import { useThemeMode } from './context/ThemeContext';
+import { Container, AppBar, Toolbar, Box, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import ParkingMap from './components/ParkingMap';
+import Sidebar from './components/Sidebar';
+import SettingsDialog from './components/SettingsDialog';
 import { logger } from './utils/logger';
 import { useParkingLotsByIds, ALL_LOT_IDS } from './hooks/useParkingData';
 import WuParkLogo from './assets/WuPark Logo 2.jpg';
@@ -24,18 +24,23 @@ const useErrorHandler = () => {
 
 const App: React.FC = () => {
   useErrorHandler();
-  const { isDarkMode, toggleTheme } = useThemeMode();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { data: parkingLots } = useParkingLotsByIds(ALL_LOT_IDS);
 
   return (
     <Router>
+      <Sidebar 
+        open={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        onSettingsClick={() => setSettingsOpen(true)} 
+      />
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
       <Routes>
-        {/* Lots with data */}
         <Route path="/lot/1" element={<Lot1DetailPage />} />
         <Route path="/lot/2" element={<Lot2DetailPage />} />
-        
-        {/* Lots without data */}
         <Route path="/lot/:lotId" element={<NoDataPage />} />
         
         <Route 
@@ -44,27 +49,16 @@ const App: React.FC = () => {
             <Box sx={{flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
               <AppBar position="static">
                 <Toolbar sx={{minHeight: { xs: 60, sm: 70 }, px: { xs: 1, sm: 2 }}}>
+                  <IconButton onClick={() => setSidebarOpen(true)} sx={{ color: '#000000', mr: 1 }}>
+                    <MenuIcon />
+                  </IconButton>
+                  <Box sx={{flexGrow: 1}} />
                   <Box 
                     component="img" 
                     src={WuParkLogo} 
                     alt="WuPark Logo" 
-                    sx={{height: { xs: 40, sm: 50 }, mr: { xs: 1, sm: 2 }}} 
+                    sx={{height: { xs: 40, sm: 50 }}} 
                   />
-                  <Box sx={{flexGrow: 1}} />
-                  <IconButton onClick={toggleTheme} sx={{ color: '#000000', mr: 1 }}>
-                    {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
-                  </IconButton>
-                  <Typography 
-                    variant="body2" 
-                    sx={{ 
-                      mr: 2, 
-                      color: '#000000',
-                      display: {xs: 'none', md: 'block'},
-                      fontSize: {sm: '0.8rem', md: '0.9rem'}
-                    }}
-                  >
-                    This application is incomplete and is for demonstration purposes only.
-                  </Typography>
                 </Toolbar>
               </AppBar>
               <Container 
