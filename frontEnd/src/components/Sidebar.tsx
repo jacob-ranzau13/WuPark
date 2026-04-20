@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onSettingsClick, parki
   };
 
   const filteredBuildings = useMemo(() => {
-    if (!searchQuery) return buildings;
+    if (!searchQuery) return [];
     return buildings.filter(building =>
       building.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -66,26 +66,39 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onSettingsClick, parki
           />
         </Box>
         <List sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {filteredBuildings.map((building) => {
-            const nearestLots = getNearestLots(building.lat, building.lng);
-            return (
-              <React.Fragment key={building.name}>
-                <ListItem>
-                  <ListItemText primary={building.name} />
-                </ListItem>
-                {nearestLots.map((lot) => (
-                  <ListItem key={lot.id} sx={{ pl: 4 }}>
-                    <ListItemButton onClick={() => navigate(`/lot/${lot.id}`)}>
-                      <ListItemText 
-                        primary={`${lot.name} (${(getDistance(building.lat, building.lng, lot.location.lat, lot.location.lng) * 1000).toFixed(0)}m)`}
-                        secondary={`${lot.occupiedSpots}/${lot.totalSpots} spots`}
-                      />
-                    </ListItemButton>
+          {!searchQuery ? (
+            parkingLots.map((lot) => (
+              <ListItem key={lot.id}>
+                <ListItemButton onClick={() => navigate(`/lot/${lot.id}`)}>
+                  <ListItemText 
+                    primary={lot.name}
+                    secondary={`${lot.occupiedSpots}/${lot.totalSpots} spots`}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))
+          ) : (
+            filteredBuildings.map((building) => {
+              const nearestLots = getNearestLots(building.lat, building.lng);
+              return (
+                <React.Fragment key={building.name}>
+                  <ListItem>
+                    <ListItemText primary={building.name} />
                   </ListItem>
-                ))}
-              </React.Fragment>
-            );
-          })}
+                  {nearestLots.map((lot) => (
+                    <ListItem key={lot.id} sx={{ pl: 4 }}>
+                      <ListItemButton onClick={() => navigate(`/lot/${lot.id}`)}>
+                        <ListItemText 
+                          primary={`${lot.name} (${(getDistance(building.lat, building.lng, lot.location.lat, lot.location.lng) * 1000).toFixed(0)}m)`}
+                          secondary={`${lot.occupiedSpots}/${lot.totalSpots} spots`}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </React.Fragment>
+              );
+            })
+          )}
         </List>
         <Box sx={{ flexGrow: 1 }} />
         <Divider />

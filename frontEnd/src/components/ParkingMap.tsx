@@ -11,6 +11,7 @@ import { mergeWithMockData } from '../utils/mockParkingData';
 import { useThemeMode } from '../context/ThemeContext';
 import { buildings } from '../data/buildings';
 import buildingMarker from '../assets/Building Marker.png';
+import buildingMarkerGrey from '../assets/Building Marker Grey.png';
 
 // Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -64,7 +65,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
   const displayLots = mergeWithMockData(lots);
 
   const tileLayerUrl = isDarkMode
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    ? 'https://{s}.basemaps.cartocdn.com/positron/{z}/{x}/{y}{r}.png'
     : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
   const tileLayer = isDarkMode
@@ -168,7 +169,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
             key={building.name}
             position={[building.lat, building.lng]}
             icon={L.icon({
-              iconUrl: buildingMarker,
+              iconUrl: isDarkMode ? buildingMarkerGrey : buildingMarker,
               iconSize: [25, 25],
               iconAnchor: [12, 12],
               popupAnchor: [0, -12],
