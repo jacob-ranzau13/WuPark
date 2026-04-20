@@ -68,12 +68,12 @@ const App: React.FC = () => {
               </AppBar>
               <Toolbar sx={{minHeight: { xs: 60, sm: 70 }}} />
               <Box sx={{
-                flexGrow: 1,
+                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 marginLeft: sidebarOpen ? `${SIDEBAR_WIDTH}px` : 0,
                 transition: 'margin-left 0.2s',
-                height: { xs: 'calc(100vh - 60px)', sm: 'calc(100vh - 70px)' }
+                overflow: 'hidden'
               }}>
                 <ParkingMap lots={parkingLots || []} />
               </Box>

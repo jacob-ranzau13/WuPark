@@ -8,6 +8,7 @@ import L from 'leaflet';
 import { ParkingLot } from '../types';
 import { useParkingLotsByIds } from '../hooks/useParkingData';
 import { mergeWithMockData } from '../utils/mockParkingData';
+import { useThemeMode } from '../context/ThemeContext';
 
 // Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -51,6 +52,7 @@ interface ParkingMapProps {
 
 const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
   const navigate = useNavigate();
+  const { isDarkMode } = useThemeMode();
   const isMobile = window.innerWidth < 600;
   
   const center: [number, number] = [37.7191, -97.2917];
@@ -59,18 +61,20 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
 
   const displayLots = mergeWithMockData(lots);
 
+  const tileLayerUrl = isDarkMode
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  const tileLayer = isDarkMode
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
   return (
     <Box
       sx={{
-        height: {
-          xs: 'calc(100vh - 140px)',
-          sm: 'calc(100vh - 160px)',
-          md: 'calc(100vh - 180px)'
-        },
-        minHeight: { xs: 300, sm: 400 },
+        flex: 1,
         width: '100%',
         position: 'relative',
-        borderRadius: 1,
         overflow: 'hidden'
       }}
     >
@@ -81,8 +85,9 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
         scrollWheelZoom={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          key={isDarkMode ? 'dark' : 'light'}
+          attribution={tileLayer}
+          url={tileLayerUrl}
         />
         {displayLots.map((lot) => {
           const hasData = lot.totalSpots > 0;
