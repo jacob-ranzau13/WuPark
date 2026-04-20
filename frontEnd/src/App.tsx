@@ -55,15 +55,14 @@ const App: React.FC = () => {
             }}>
               <AppBar position="fixed" sx={{ zIndex: 1300 }}>
                 <Toolbar sx={{minHeight: { xs: 60, sm: 70 }, px: { xs: 1, sm: 2 }}}>
-                  <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} sx={{ color: '#000000', mr: 1 }}>
+                  <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} sx={{ mr: 1 }}>
                     <MenuIcon />
                   </IconButton>
-                  <Box sx={{flexGrow: 1}} />
                   <Box 
                     component="img" 
                     src={WuParkLogo} 
                     alt="WuPark Logo" 
-                    sx={{height: { xs: 40, sm: 50 }}} 
+                    sx={{height: { xs: 40, sm: 50 }, mr: { xs: 1, sm: 2 }}} 
                   />
                 </Toolbar>
               </AppBar>
