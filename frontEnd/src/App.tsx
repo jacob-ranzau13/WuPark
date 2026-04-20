@@ -50,13 +50,11 @@ const App: React.FC = () => {
               flexGrow: 1, 
               minHeight: '100vh', 
               display: 'flex', 
-              flexDirection: 'column',
-              marginLeft: sidebarOpen ? `${SIDEBAR_WIDTH}px` : 0,
-              transition: 'margin-left 0.2s'
+              flexDirection: 'column'
             }}>
-              <AppBar position="static">
+              <AppBar position="fixed" sx={{ zIndex: 1300 }}>
                 <Toolbar sx={{minHeight: { xs: 60, sm: 70 }, px: { xs: 1, sm: 2 }}}>
-                  <IconButton onClick={() => setSidebarOpen(true)} sx={{ color: '#000000', mr: 1 }}>
+                  <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} sx={{ color: '#000000', mr: 1 }}>
                     <MenuIcon />
                   </IconButton>
                   <Box sx={{flexGrow: 1}} />
@@ -68,19 +66,17 @@ const App: React.FC = () => {
                   />
                 </Toolbar>
               </AppBar>
-              <Container 
-                maxWidth="xl" 
-                sx={{ 
-                  mt: {xs: 1, sm: 2, md: 4}, 
-                  mb: {xs: 1, sm: 2, md: 4},
-                  px: {xs: 1, sm: 2, md: 3},
-                  flexGrow: 1,
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-              >
+              <Toolbar sx={{minHeight: { xs: 60, sm: 70 }}} />
+              <Box sx={{
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                marginLeft: sidebarOpen ? `${SIDEBAR_WIDTH}px` : 0,
+                transition: 'margin-left 0.2s',
+                height: { xs: 'calc(100vh - 60px)', sm: 'calc(100vh - 70px)' }
+              }}>
                 <ParkingMap lots={parkingLots || []} />
-              </Container>
+              </Box>
             </Box>
           }
         />
