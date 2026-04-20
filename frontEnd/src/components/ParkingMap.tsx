@@ -74,6 +74,8 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
       sx={{
         flex: 1,
         width: '100%',
+        height: '100%',
+        minHeight: 'calc(100vh - 70px)',
         position: 'relative',
         overflow: 'hidden'
       }}
@@ -81,7 +83,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
       <MapContainer
         center={center}
         zoom={zoom}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', minHeight: 'calc(100vh - 70px)' }}
         scrollWheelZoom={true}
       >
         <TileLayer
