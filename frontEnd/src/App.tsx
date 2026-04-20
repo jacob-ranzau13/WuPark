@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container, AppBar, Toolbar, Box, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ParkingMap from './components/ParkingMap';
-import Sidebar from './components/Sidebar';
+import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
 import SettingsDialog from './components/SettingsDialog';
 import { logger } from './utils/logger';
 import { useParkingLotsByIds, ALL_LOT_IDS } from './hooks/useParkingData';
@@ -46,7 +46,14 @@ const App: React.FC = () => {
         <Route 
           path="/" 
           element={
-            <Box sx={{flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
+            <Box sx={{
+              flexGrow: 1, 
+              minHeight: '100vh', 
+              display: 'flex', 
+              flexDirection: 'column',
+              marginLeft: sidebarOpen ? `${SIDEBAR_WIDTH}px` : 0,
+              transition: 'margin-left 0.2s'
+            }}>
               <AppBar position="static">
                 <Toolbar sx={{minHeight: { xs: 60, sm: 70 }, px: { xs: 1, sm: 2 }}}>
                   <IconButton onClick={() => setSidebarOpen(true)} sx={{ color: '#000000', mr: 1 }}>

@@ -5,6 +5,8 @@ import {
 import MapIcon from '@mui/icons-material/Map';
 import SettingsIcon from '@mui/icons-material/Settings';
 
+export const SIDEBAR_WIDTH = 250;
+
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
@@ -13,8 +15,13 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onSettingsClick }) => {
   return (
-    <Drawer open={open} onClose={onClose}>
-      <Box sx={{ width: 250, height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Drawer 
+      variant="persistent" 
+      open={open} 
+      onClose={onClose}
+      sx={{ '& .MuiDrawer-paper': { top: { xs: 60, sm: 70 }, height: 'auto', bottom: 0 } }}
+    >
+      <Box sx={{ width: SIDEBAR_WIDTH, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <List>
           <ListItem disablePadding>
             <ListItemButton onClick={onClose}>

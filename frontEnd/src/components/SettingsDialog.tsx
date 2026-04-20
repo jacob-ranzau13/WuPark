@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, Switch, FormControlLabel, Box } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Switch, FormControlLabel, Box, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useThemeMode } from '../context/ThemeContext';
@@ -14,7 +15,10 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Settings</DialogTitle>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        Settings
+        <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+      </DialogTitle>
       <DialogContent>
         <FormControlLabel
           control={<Switch checked={isDarkMode} onChange={toggleTheme} />}
