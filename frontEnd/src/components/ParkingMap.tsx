@@ -9,6 +9,8 @@ import { ParkingLot } from '../types';
 import { useParkingLotsByIds } from '../hooks/useParkingData';
 import { mergeWithMockData } from '../utils/mockParkingData';
 import { useThemeMode } from '../context/ThemeContext';
+import { buildings } from '../data/buildings';
+import buildingMarker from '../assets/Building Marker.png';
 
 // Fix Leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -159,6 +161,24 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
             </Marker>
           );
         })}
+        {buildings.map((building) => (
+          <Marker
+            key={building.name}
+            position={[building.lat, building.lng]}
+            icon={L.icon({
+              iconUrl: buildingMarker,
+              iconSize: [25, 25],
+              iconAnchor: [12, 12],
+              popupAnchor: [0, -12],
+            })}
+            eventHandlers={{
+              mouseover: (e) => e.target.openPopup(),
+              mouseout: (e) => e.target.closePopup(),
+            }}
+          >
+            <Popup>{building.name}</Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </Box>
   );

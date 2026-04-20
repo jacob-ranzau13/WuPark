@@ -34,7 +34,8 @@ const App: React.FC = () => {
       <Sidebar 
         open={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
-        onSettingsClick={() => setSettingsOpen(true)} 
+        onSettingsClick={() => setSettingsOpen(true)}
+        parkingLots={parkingLots || []}
       />
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
