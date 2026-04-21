@@ -19,6 +19,19 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onSettingsClick, parkingLots }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedBuildings, setExpandedBuildings] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (buildingName: string) => {
+    setExpandedBuildings(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(buildingName)) {
+        newSet.delete(buildingName);
+      } else {
+        newSet.add(buildingName);
+      }
+      return newSet;
+    });
+  };
 
   // Haversine distance calculation
   const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
@@ -67,16 +80,28 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onSettingsClick, parki
         </Box>
         <List sx={{ flexGrow: 1, overflow: 'auto' }}>
           {!searchQuery ? (
-            parkingLots.map((lot) => (
-              <ListItem key={lot.id}>
-                <ListItemButton onClick={() => navigate(`/lot/${lot.id}`)}>
-                  <ListItemText 
-                    primary={lot.name}
-                    secondary={`${lot.occupiedSpots}/${lot.totalSpots} spots`}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))
+            buildings.map((building) => {
+              const nearestLots = getNearestLots(building.lat, building.lng);
+              return (
+                <React.Fragment key={building.name}>
+                  <ListItem>
+                    <ListItemButton onClick={() => toggleExpanded(building.name)}>
+                      <ListItemText primary={building.name} />
+                    </ListItemButton>
+                  </ListItem>
+                  {expandedBuildings.has(building.name) && nearestLots.map((lot) => (
+                    <ListItem key={lot.id} sx={{ pl: 4 }}>
+                      <ListItemButton onClick={() => navigate(`/lot/${lot.id}`)}>
+                        <ListItemText 
+                          primary={`${lot.name} (${(getDistance(building.lat, building.lng, lot.location.lat, lot.location.lng) * 1000).toFixed(0)}m)`}
+                          secondary={`${lot.occupiedSpots}/${lot.totalSpots} spots`}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </React.Fragment>
+              );
+            })
           ) : (
             filteredBuildings.map((building) => {
               const nearestLots = getNearestLots(building.lat, building.lng);
