@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container, AppBar, Toolbar, Box, IconButton } from '@mui/material';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AppBar, Toolbar, Box, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ParkingMap from './components/ParkingMap';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
@@ -26,11 +26,18 @@ const App: React.FC = () => {
   useErrorHandler();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const location = useLocation();
 
   const { data: parkingLots } = useParkingLotsByIds(ALL_LOT_IDS);
 
+  useEffect(() => {
+    if (location.pathname.startsWith('/lot/')) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname]);
+
   return (
-    <Router>
+    <>
       <Sidebar 
         open={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
@@ -82,7 +89,7 @@ const App: React.FC = () => {
           }
         />
       </Routes>
-    </Router>
+    </>
   );
 };
 
