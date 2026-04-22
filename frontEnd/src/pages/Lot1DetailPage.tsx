@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, AppBar, Toolbar, IconButton, Typography, Container } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { ArrowBack } from '@mui/icons-material';
 import LotDemo from '../assets/LotDemo.png';
 import WuParkLogo from '../assets/WuPark Logo 2.jpg';
@@ -58,6 +59,7 @@ const statusColor = (s?: StallStatus) => {
 
 const Lot1DetailPage: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { data: parkingLots } = useParkingLotsByIds([1]);
   const lot = parkingLots?.[0];
 
@@ -109,8 +111,9 @@ const Lot1DetailPage: React.FC = () => {
     );
   }
 
-  const total = lot.totalSpots ?? stalls.length;
   const available = stalls.filter(s => s.status === 'free').length;
+  const total = lot.totalSpots || stalls.length;
+  const isDarkMode = theme.palette.mode === 'dark';
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -140,21 +143,26 @@ const Lot1DetailPage: React.FC = () => {
         }}
       >
         <Box>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 2 }}>
-            <Box sx={{ backgroundColor: '#f5f5f5', px: 2, py: 1, borderRadius: 1, minWidth: 140, textAlign: 'center' }}>
-              <Typography variant="caption" color="textSecondary">Total stalls</Typography>
-              <Typography variant="h6">{total}</Typography>
-            </Box>
-
-            <Box sx={{ backgroundColor: '#f5f5f5', px: 2, py: 1, borderRadius: 1, minWidth: 140, textAlign: 'center' }}>
-              <Typography variant="caption" color="textSecondary">Available</Typography>
-              <Typography variant="h6" color={available > 0 ? 'success.main' : 'error.main'}>{available} / {total}</Typography>
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 1 }}>{lot.name}</Typography>
+            <Box sx={{
+              backgroundColor: isDarkMode ? theme.palette.primary.main : '#f5f5f5',
+              color: isDarkMode ? theme.palette.primary.contrastText : 'inherit',
+              px: 2,
+              py: 1,
+              borderRadius: 1,
+              minWidth: 180,
+              textAlign: 'center',
+              display: 'inline-block'
+            }}>
+              <Typography variant="caption" color={isDarkMode ? 'inherit' : 'textSecondary'}>Available</Typography>
+              <Typography variant="h6" color={available > 0 ? 'success.main' : 'error.main'}>{available}/{total}</Typography>
             </Box>
           </Box>
 
           {lot && lot.lastUpdated ? (
             <Box sx={{ textAlign: 'center', mb: 1 }}>
-              <Typography variant="caption">Lot {lot.id} • Last updated: {new Date(lot.lastUpdated).toLocaleString()}</Typography>
+              <Typography variant="caption">Last updated: {new Date(lot.lastUpdated).toLocaleString()}</Typography>
             </Box>
           ) : null}
 
