@@ -187,7 +187,7 @@ const Lot1DetailPage: React.FC = () => {
               component="img"
               src={SouthEastLot}
               alt="Southeast Lot"
-              sx={{ width: { xs: '100%', sm: '92%', md: '85%' }, height: 'auto', display: 'block', margin: '0 auto' }}
+              sx={{ width: '85%', height: 'auto', display: 'block', margin: '0 auto' }}
               ref={imgRef}
               onLoad={onImageLoad}
             />
