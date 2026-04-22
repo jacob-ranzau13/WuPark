@@ -166,27 +166,21 @@ const Lot2DetailPage: React.FC = () => {
       >
         <Box>
           <Box sx={{ textAlign: 'center', mb: 2 }}>
-            <Typography variant="h5" sx={{ mb: 1 }}>{lot.name || `Lot ${lot.id}`}</Typography>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>{lot.name || `Lot ${lot.id}`}</Typography>
             <Box sx={{
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
-              px: 2,
-              py: 1,
-              borderRadius: 1,
-              minWidth: 180,
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              minWidth: 260,
               textAlign: 'center',
               display: 'inline-block'
             }}>
-              <Typography variant="caption" color="inherit">Available</Typography>
-              <Typography variant="h6" color={available > 0 ? 'success.main' : 'error.main'}>{available}/{total}</Typography>
+              <Typography variant="body1" color="inherit" sx={{ fontWeight: 600 }}>Available</Typography>
+              <Typography variant="h4" color={"black"} sx={{ fontWeight: 700 }}>{available}/{total}</Typography>
             </Box>
           </Box>
-
-          {lot && lot.lastUpdated ? (
-            <Box sx={{ textAlign: 'center', mb: 1 }}>
-              <Typography variant="caption">Last updated: {new Date(lot.lastUpdated).toLocaleString()}</Typography>
-            </Box>
-          ) : null}
 
           <Box sx={{ position: 'relative', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
             <Box
@@ -248,9 +242,11 @@ const Lot2DetailPage: React.FC = () => {
             })}
           </Box>
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="caption">Click a stall dot for details (future).</Typography>
-          </Box>
+          {lot && lot.lastUpdated ? (
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Typography variant="caption">Last updated: {new Date(lot.lastUpdated).toLocaleString()}</Typography>
+            </Box>
+          ) : null}
         </Box>
       </Container>
     </Box>
