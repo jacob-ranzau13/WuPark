@@ -187,7 +187,7 @@ const Lot1DetailPage: React.FC = () => {
               component="img"
               src={SouthEastLot}
               alt="Southeast Lot"
-              sx={{ width: '85%', height: 'auto', display: 'block', margin: '0 auto' }}
+              sx={{ width: { xs: '100%', sm: '92%', md: '85%' }, height: 'auto', display: 'block', margin: '0 auto' }}
               ref={imgRef}
               onLoad={onImageLoad}
             />
@@ -205,7 +205,11 @@ const Lot1DetailPage: React.FC = () => {
                     position: 'absolute',
                     left,
                     top,
-                    transform: 'translate(-50%, -50%)',
+                    transform: {
+                      xs: 'translate(-50%, -50%) scale(0.67)',
+                      sm: 'translate(-50%, -50%) scale(0.8)',
+                      md: 'translate(-50%, -50%)'
+                    },
                     display: 'flex',
                     alignItems: 'center',
                     pointerEvents: 'auto',
