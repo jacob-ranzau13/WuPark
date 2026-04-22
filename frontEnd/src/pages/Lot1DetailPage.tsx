@@ -31,7 +31,7 @@ const STALL_POSITIONS = [
   { xPx: 470, yPx: 221 },
 ];
 
-const SPOT_KEYS = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'];
+const SPOT_KEYS = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4'];
 
 const buildStalls = (spots?: { id: string; isOccupied: boolean }[]): Stall[] => {
   const spotMap: Record<string, boolean | undefined> = {};
@@ -113,7 +113,6 @@ const Lot1DetailPage: React.FC = () => {
 
   const available = stalls.filter(s => s.status === 'free').length;
   const total = lot.totalSpots || stalls.length;
-  const isDarkMode = theme.palette.mode === 'dark';
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -146,8 +145,8 @@ const Lot1DetailPage: React.FC = () => {
           <Box sx={{ textAlign: 'center', mb: 2 }}>
             <Typography variant="h5" sx={{ mb: 1 }}>{lot.name}</Typography>
             <Box sx={{
-              backgroundColor: isDarkMode ? theme.palette.primary.main : '#f5f5f5',
-              color: isDarkMode ? theme.palette.primary.contrastText : 'inherit',
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
               px: 2,
               py: 1,
               borderRadius: 1,
@@ -155,7 +154,7 @@ const Lot1DetailPage: React.FC = () => {
               textAlign: 'center',
               display: 'inline-block'
             }}>
-              <Typography variant="caption" color={isDarkMode ? 'inherit' : 'textSecondary'}>Available</Typography>
+              <Typography variant="caption" color="inherit">Available</Typography>
               <Typography variant="h6" color={available > 0 ? 'success.main' : 'error.main'}>{available}/{total}</Typography>
             </Box>
           </Box>
@@ -181,10 +180,6 @@ const Lot1DetailPage: React.FC = () => {
               const left = pos ? `${pos.x}%` : (typeof s.x === 'number' ? `${s.x}%` : '0%');
               const top = pos ? `${pos.y}%` : (typeof s.y === 'number' ? `${s.y}%` : '0%');
 
-              const rawLabel = s.label ?? String(s.id);
-              const labelText = rawLabel.toString().startsWith('A') ? rawLabel.toString().slice(1) : rawLabel.toString();
-              const showLeft = Number(s.id) >= 5;
-
               return (
                 <Box
                   key={s.id}
@@ -199,18 +194,31 @@ const Lot1DetailPage: React.FC = () => {
                     pointerEvents: 'auto',
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexDirection: showLeft ? 'row-reverse' : 'row' }}>
-                    <Box
+                  <Box
+                    sx={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: '50%',
+                      backgroundColor: statusColor(s.status),
+                      border: '2px solid #fff',
+                      boxShadow: '0 1px 6px rgba(0,0,0,0.40)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
                       sx={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: '50%',
-                        backgroundColor: statusColor(s.status),
-                        border: '2px solid #fff',
-                        boxShadow: '0 0 6px rgba(0,0,0,0.3)',
+                        userSelect: 'none',
+                        color: '#fff',
+                        fontWeight: 700,
+                        fontSize: '0.60rem',
+                        lineHeight: 1,
                       }}
-                    />
-                    <Typography variant="caption" sx={{ userSelect: 'none' }}>{labelText}</Typography>
+                    >
+                      {s.label}
+                    </Typography>
                   </Box>
                 </Box>
               );
