@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, AppBar, Toolbar, IconButton, Typography, Container } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { ArrowBack } from '@mui/icons-material';
-import LotDemo from '../assets/LotDemo.png';
+import SouthWestLot from '../assets/SouthWest Lot.png';
 import WuParkLogo from '../assets/WuPark Logo 2.jpg';
 import { useParkingLotsByIds } from '../hooks/useParkingData';
 import { logger } from '../utils/logger';
@@ -20,18 +20,41 @@ export interface Stall {
   status?: StallStatus;
 }
 
-const STALL_POSITIONS = [
-  { xPx: 241, yPx: 101 },
-  { xPx: 241, yPx: 141 },
-  { xPx: 241, yPx: 181 },
-  { xPx: 241, yPx: 221 },
-  { xPx: 470, yPx: 101 },
-  { xPx: 470, yPx: 141 },
-  { xPx: 470, yPx: 181 },
-  { xPx: 470, yPx: 221 },
+const colX = {
+  A: 110,
+  B: 222,
+  C: 305,
+  D: 417,
+};
+
+const rowY = {
+  1: 58,
+  2: 94,
+  3: 130,
+  4: 165,
+  5: 201,
+  6: 236,
+  7: 272,
+  8: 307,
+};
+
+
+const SPOT_KEYS = [
+  'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 
+  'B2', 'B3', 'B4', 'B5', 'B6', 'B7',
+  'C2', 'C3', 'C4', 'C5', 'C6', 'C7',
+  'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'
 ];
 
-const SPOT_KEYS = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4'];
+const STALL_POSITIONS = SPOT_KEYS.map((key) => {
+  const col = key[0] as keyof typeof colX;
+  const row = Number(key.slice(1)) as keyof typeof rowY;
+
+  return {
+    xPx: colX[col],
+    yPx: rowY[row],
+  };
+});
 
 const buildStalls = (spots?: { id: string; isOccupied: boolean }[]): Stall[] => {
   const spotMap: Record<string, boolean | undefined> = {};
@@ -168,9 +191,9 @@ const Lot2DetailPage: React.FC = () => {
           <Box sx={{ position: 'relative', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
             <Box
               component="img"
-              src={LotDemo}
-              alt="Lot Demo"
-              sx={{ width: '100%', height: 'auto', display: 'block' }}
+              src={SouthWestLot}
+              alt="Southwest Lot"
+              sx={{ width: '85%', height: 'auto', display: 'block', margin: '0 auto' }}
               ref={imgRef}
               onLoad={onImageLoad}
             />
