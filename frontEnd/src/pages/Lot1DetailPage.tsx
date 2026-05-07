@@ -83,7 +83,7 @@ const statusColor = (s?: StallStatus) => {
 const Lot1DetailPage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const { data: parkingLots } = useParkingLotsByIds([1]);
+  const { data: parkingLots } = useParkingLotsByIds([2]);
   const lot = parkingLots?.[0];
 
   const stalls = useMemo(() => {
