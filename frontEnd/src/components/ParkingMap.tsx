@@ -95,11 +95,18 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
           url={tileLayerUrl}
         />
         {displayLots.map((lot) => {
-          const hasData = lot.totalSpots > 0;
+          // Swap data for demo: show lot 2 data for lot 1, and lot 1 data for lot 2
+          let dataLot = lot;
+          if (lot.id === 1 || lot.id === 2) {
+            const oppositeLotId = lot.id === 1 ? 2 : 1;
+            dataLot = displayLots.find(l => l.id === oppositeLotId) || lot;
+          }
+          
+          const hasData = dataLot.totalSpots > 0;
           const occupancyRate = hasData 
-            ? (lot.occupiedSpots / lot.totalSpots) * 100 
+            ? (dataLot.occupiedSpots / dataLot.totalSpots) * 100 
             : 0;
-          const availableSpots = lot.totalSpots - lot.occupiedSpots;
+          const availableSpots = dataLot.totalSpots - dataLot.occupiedSpots;
           
           return (
             <Marker
@@ -132,7 +139,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
                       </Box>
                       <Box textAlign="center">
                         <Typography variant="h4" color="error.main">
-                          {lot.occupiedSpots}
+                          {dataLot.occupiedSpots}
                         </Typography>
                         <Typography variant="body2">Occupied</Typography>
                       </Box>
@@ -157,7 +164,7 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ lots }) => {
                   </Box>
                   
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    Updated: {new Date(lot.lastUpdated).toLocaleTimeString()}
+                    Updated: {new Date(dataLot.lastUpdated).toLocaleTimeString()}
                   </Typography>
                 </Box>
               </Popup>
