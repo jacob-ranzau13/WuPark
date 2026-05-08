@@ -166,7 +166,7 @@ const Lot1DetailPage: React.FC = () => {
       >
         <Box>
           <Box sx={{ textAlign: 'center', mb: 2 }}>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>{lot.name}</Typography>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Lot 9E</Typography>
             <Box sx={{
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
